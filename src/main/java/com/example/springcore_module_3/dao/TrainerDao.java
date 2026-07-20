@@ -9,7 +9,6 @@ public interface TrainerDao {
 
     Trainer create(Trainer trainer);
     boolean update(Trainer trainer);
-    Optional<Trainer> delete(Long id);
     Optional<Trainer> findById(Long id);
     Optional<Trainer> findByUsername(String username);
     List<Trainer> findAll();

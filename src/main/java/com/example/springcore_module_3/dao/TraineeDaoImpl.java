@@ -29,7 +29,7 @@ public class TraineeDaoImpl implements TraineeDao{
     public void init(){
         long maxId = traineeStorage.keySet().stream().mapToLong(Long::longValue).max().orElse(0);
         counter.set(maxId);
-        log.info("Trainee Storage initialized with {} records, next id is {}", traineeStorage.size(),  maxId + 1);
+        log.debug("Trainee Storage initialized with {} records, next id is {}", traineeStorage.size(),  maxId + 1);
     }
 
     @Override
@@ -37,23 +37,30 @@ public class TraineeDaoImpl implements TraineeDao{
         Long id = counter.incrementAndGet();
         trainee.setUserId(id);
         traineeStorage.put(id, trainee);
-        log.info("Trainee created with id {}", id);
+        log.debug("Trainee inserted with id {}", id);
         return trainee;
     }
 
     @Override
     public boolean update(Trainee trainee) {
        if(!traineeStorage.containsKey(trainee.getUserId())){
-           log.warn("Trainee not found with id {}", trainee.getUserId());
            return false;
        }
        traineeStorage.put(trainee.getUserId(), trainee);
+       log.debug("Trainee updated with id {}", trainee.getUserId());
        return true;
     }
 
     @Override
     public Optional<Trainee> delete(Long id) {
-        return Optional.ofNullable(traineeStorage.remove(id));
+        Optional<Trainee> deletedTrainee = Optional.ofNullable(traineeStorage.remove(id));
+
+        if (deletedTrainee.isPresent()) {
+            log.debug("Trainee removed from storage with id {}", id);
+        } else {
+            log.debug("No trainee found in storage with id {}", id);
+        }
+        return deletedTrainee;
     }
 
     @Override

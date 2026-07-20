@@ -29,7 +29,7 @@ public class TrainingDaoImpl implements TrainingDao {
     public void init(){
         long maxId = trainingStorage.keySet().stream().mapToLong(Long::longValue).max().orElse(0);
         counter.set(maxId);
-        log.info("Training Storage initialized with {} records, next id is {}", trainingStorage.size(),  maxId + 1);
+        log.debug("Training Storage initialized with {} records, next id is {}", trainingStorage.size(),  maxId + 1);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class TrainingDaoImpl implements TrainingDao {
         long id = counter.incrementAndGet();
         training.setTrainingId(id);
         trainingStorage.put(id, training);
-        log.info("Training storage created with id {}", id);
+        log.debug("Training inserted with id {}", id);
         return training;
     }
 

@@ -1,5 +1,6 @@
 package com.example.springcore_module_3.dao;
 
+import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class TrainerDaoImpl implements TrainerDao {
     public void init(){
         long maxId = trainerStorage.keySet().stream().mapToLong(Long::longValue).max().orElse(0);
         counter.set(maxId);
-        log.info("Trainer Storage initialized with {} records, next id is {}", trainerStorage.size(),  maxId + 1);
+        log.debug("Trainer Storage initialized with {} records, next id is {}", trainerStorage.size(),  maxId + 1);
     }
 
     @Override
@@ -37,24 +38,18 @@ public class TrainerDaoImpl implements TrainerDao {
         Long id = counter.incrementAndGet();
         trainer.setUserId(id);
         trainerStorage.put(id, trainer);
-        log.info("Trainer created with id {}", id);
+        log.info("Trainer inserted with id {}", id);
         return trainer;
     }
 
     @Override
     public boolean update(Trainer trainer) {
-
         if(!trainerStorage.containsKey(trainer.getUserId())){
-            log.warn("Attempted to update non-existing trainer id={}", trainer.getUserId());
             return false;
         }
         trainerStorage.put(trainer.getUserId(),trainer);
+        log.debug("Trainer updated with id {}", trainer.getUserId());
         return true;
-    }
-
-    @Override
-    public Optional<Trainer> delete(Long id) {
-        return Optional.ofNullable(trainerStorage.remove(id));
     }
 
     @Override
