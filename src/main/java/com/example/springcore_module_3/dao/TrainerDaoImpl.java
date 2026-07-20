@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,24 +29,24 @@ public class TrainerDaoImpl implements TrainerDao {
     public void init(){
         long maxId = trainerStorage.keySet().stream().mapToLong(Long::longValue).max().orElse(0);
         counter.set(maxId);
-        log.debug("Trainer Storage initialized with {} records, next id is {}", trainerStorage.size(),  maxId + 1);
+        log.info("Trainer Storage initialized with {} records, next id is {}", trainerStorage.size(),  maxId + 1);
     }
 
     @Override
     public Trainer create(Trainer trainer) {
-        long id = counter.incrementAndGet();
+        Long id = counter.incrementAndGet();
         trainer.setUserId(id);
         trainerStorage.put(id, trainer);
-        log.debug("Trainer created with id {}", id);
+        log.info("Trainer created with id {}", id);
         return trainer;
     }
 
     @Override
     public Trainer update(Trainer trainer) {
-        long id = trainer.getUserId();
+        Long id = trainer.getUserId();
         if(trainerStorage.containsKey(id)){
             trainerStorage.put(id, trainer);
-            log.debug("Trainer updated with id {}", id);
+            log.info("Trainer updated with id {}", id);
             return trainer;
         }else{
             log.warn("Attempted to update non-existing trainer id={}", id);
@@ -57,7 +58,7 @@ public class TrainerDaoImpl implements TrainerDao {
     public void delete(Long id) {
         if(trainerStorage.containsKey(id)){
             trainerStorage.remove(id);
-            log.debug("Trainer deleted with id {}", id);
+            log.info("Trainer deleted with id {}", id);
         }else {
             log.warn("Attempted to delete non-existing trainer id={}", id);
             throw new IllegalStateException("Trainer not found");
@@ -67,5 +68,17 @@ public class TrainerDaoImpl implements TrainerDao {
     @Override
     public Optional<Trainer> findById(Long id) {
         return Optional.ofNullable(trainerStorage.get(id));
+    }
+
+    @Override
+    public Optional<Trainer> findByUsername(String username) {
+        return trainerStorage.values().stream()
+                .filter(trainer -> trainer.getUsername().equals(username))
+                .findFirst();
+    }
+
+    @Override
+    public List<Trainer> findAll() {
+        return trainerStorage.values().stream().toList();
     }
 }

@@ -10,8 +10,9 @@ import java.time.LocalDate;
 @Setter
 public class Training {
 
-    private long traineeId;
-    private long trainerId;
+    private Long trainingId;
+    private Long traineeId;
+    private Long trainerId;
     private String trainingName;
     private TrainingType trainingType;
     private LocalDate trainingDate;
