@@ -12,8 +12,8 @@ public class Trainee extends User{
     private String address;
     private LocalDate dateOfBirth;
 
-    public Trainee(long userId, String firstName, String lastName, String username, String password, String address, LocalDate dateOfBirth) {
-        super(userId, firstName, lastName, username, password);
+    public Trainee(String firstName, String lastName, String username, String password, String address, LocalDate dateOfBirth) {
+        super(firstName, lastName, username, password);
         this.address = address;
         this.dateOfBirth = dateOfBirth;
     }
