@@ -42,27 +42,18 @@ public class TraineeDaoImpl implements TraineeDao{
     }
 
     @Override
-    public Trainee update(Trainee trainee) {
-        Long id = trainee.getUserId();
-        if(traineeStorage.containsKey(id)){
-            traineeStorage.put(id, trainee);
-            log.info("Trainee updated with id {}", id);
-            return trainee;
-        }else{
-            log.warn("Attempted to update non-existing trainee id={}", id);
-            throw new IllegalStateException("Trainee not found");
-        }
+    public boolean update(Trainee trainee) {
+       if(!traineeStorage.containsKey(trainee.getUserId())){
+           log.warn("Trainee not found with id {}", trainee.getUserId());
+           return false;
+       }
+       traineeStorage.put(trainee.getUserId(), trainee);
+       return true;
     }
 
     @Override
-    public void delete(Long id) {
-        if(traineeStorage.containsKey(id)){
-            traineeStorage.remove(id);
-            log.info("Trainee deleted with id {}", id);
-        }else{
-            log.warn("Attempted to delete non-existing trainee id={}", id);
-            throw new IllegalStateException("Trainee not found");
-        }
+    public Optional<Trainee> delete(Long id) {
+        return Optional.ofNullable(traineeStorage.remove(id));
     }
 
     @Override

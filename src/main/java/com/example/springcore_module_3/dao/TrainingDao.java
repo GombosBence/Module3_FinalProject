@@ -1,7 +1,5 @@
 package com.example.springcore_module_3.dao;
 
-import com.example.springcore_module_3.model.Trainee;
-import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.Training;
 
 import java.util.List;

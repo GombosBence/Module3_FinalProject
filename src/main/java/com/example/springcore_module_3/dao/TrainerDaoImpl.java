@@ -42,27 +42,19 @@ public class TrainerDaoImpl implements TrainerDao {
     }
 
     @Override
-    public Trainer update(Trainer trainer) {
-        Long id = trainer.getUserId();
-        if(trainerStorage.containsKey(id)){
-            trainerStorage.put(id, trainer);
-            log.info("Trainer updated with id {}", id);
-            return trainer;
-        }else{
-            log.warn("Attempted to update non-existing trainer id={}", id);
-            throw new IllegalStateException("Trainer not found");
+    public boolean update(Trainer trainer) {
+
+        if(!trainerStorage.containsKey(trainer.getUserId())){
+            log.warn("Attempted to update non-existing trainer id={}", trainer.getUserId());
+            return false;
         }
+        trainerStorage.put(trainer.getUserId(),trainer);
+        return true;
     }
 
     @Override
-    public void delete(Long id) {
-        if(trainerStorage.containsKey(id)){
-            trainerStorage.remove(id);
-            log.info("Trainer deleted with id {}", id);
-        }else {
-            log.warn("Attempted to delete non-existing trainer id={}", id);
-            throw new IllegalStateException("Trainer not found");
-        }
+    public Optional<Trainer> delete(Long id) {
+        return Optional.ofNullable(trainerStorage.remove(id));
     }
 
     @Override
