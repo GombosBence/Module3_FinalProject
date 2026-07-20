@@ -10,5 +10,4 @@ public interface TraineeDao {
     Trainee update(Trainee trainee);
     void delete(Long id);
     Optional<Trainee> findById(Long id);
-
 }
