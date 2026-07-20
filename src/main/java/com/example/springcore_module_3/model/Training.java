@@ -19,7 +19,7 @@ public class Training {
     private Duration trainingDuration;
 
 
-    public Training(long traineeId, long trainerId, String trainingName, TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration) {
+    public Training(Long traineeId, Long trainerId, String trainingName, TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration) {
         this.traineeId = traineeId;
         this.trainerId = trainerId;
         this.trainingName = trainingName;
