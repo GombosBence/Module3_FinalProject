@@ -84,7 +84,8 @@ public class TrainerServiceImplTest {
         trainer.setUserId(1L);
         when(trainerDao.findById(1L)).thenReturn(Optional.of(trainer));
 
-        assertDoesNotThrow(() -> trainerService.selectTrainerProfile(1L));
+        Trainer result = assertDoesNotThrow(() -> trainerService.selectTrainerProfile(1L));
+        assertEquals(1L, result.getUserId());
         verify(trainerDao).findById(1L);
     }
 
@@ -101,10 +102,10 @@ public class TrainerServiceImplTest {
     void selectTrainerProfileByUsernameSuccessTest(){
         Trainer trainer = new Trainer();
         trainer.setUsername("John.Doe");
-        when(trainerDao.findByUsername("John")).thenReturn(Optional.of(trainer));
+        when(trainerDao.findByUsername("John.Doe")).thenReturn(Optional.of(trainer));
 
-        assertDoesNotThrow(() -> trainerService.selectTrainerProfileByUsername("John"));
-        verify(trainerDao).findByUsername("John");
+        assertDoesNotThrow(() -> trainerService.selectTrainerProfileByUsername("John.Doe"));
+        verify(trainerDao).findByUsername("John.Doe");
     }
 
     @Test

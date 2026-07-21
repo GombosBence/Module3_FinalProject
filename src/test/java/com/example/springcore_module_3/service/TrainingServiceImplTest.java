@@ -60,18 +60,23 @@ public class TrainingServiceImplTest {
         trainer.setUserId(3L);
         when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
         when(trainerDao.findById(3L)).thenReturn(Optional.of(trainer));
+        LocalDate date = LocalDate.of(2026, 3, 14);
+        Duration duration = Duration.ofMinutes(90);
 
         Training training = assertDoesNotThrow(() -> trainingServiceImpl.createTraining(1L, 3L, "Sample",
-                TrainingType.FITNESS, LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
+                TrainingType.FITNESS, date, duration));
 
+        assertEquals(1L, training.getTraineeId());
+        assertEquals(3L, training.getTrainerId());
+        assertEquals("Sample", training.getTrainingName());
+        assertEquals(TrainingType.FITNESS, training.getTrainingType());
+        assertEquals(date, training.getTrainingDate());
+        assertEquals(duration, training.getTrainingDuration());
         verify(trainingDao).create(training);
     }
 
     @Test
     void createTraining_traineeDoesNotExistTest(){
-        Trainee trainee = new Trainee();
-        trainee.setUserId(1L);
-
         when(traineeDao.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.createTraining(1L, 3L, "Sample",
@@ -81,9 +86,7 @@ public class TrainingServiceImplTest {
     @Test
     void createTraining_trainerDoesNotExistTest(){
         Trainee trainee = new Trainee();
-        Trainer trainer = new Trainer();
         trainee.setUserId(1L);
-        trainer.setUserId(3L);
         when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
         when(trainerDao.findById(3L)).thenReturn(Optional.empty());
 
