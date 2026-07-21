@@ -14,6 +14,6 @@ public interface TrainingService {
                             TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration);
     Training getTrainingById(Long id);
     List<Training> selectAllTrainingsByTrainee(Long id);
-    List<Training> selectAllTrainingByTrainer(Long id);
+    List<Training> selectAllTrainingsByTrainer(Long id);
 
 }

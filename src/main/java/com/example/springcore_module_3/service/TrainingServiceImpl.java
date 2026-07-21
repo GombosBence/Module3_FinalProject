@@ -70,7 +70,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    public List<Training> selectAllTrainingByTrainer(Long id) {
+    public List<Training> selectAllTrainingsByTrainer(Long id) {
         return trainingDao.findAllByTrainer(id);
     }
 }

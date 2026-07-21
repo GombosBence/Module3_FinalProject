@@ -82,7 +82,7 @@ public class GymFacade {
     }
 
     public List<Training> getTrainingsByTrainerId(Long trainerId) {
-        return trainingService.selectAllTrainingByTrainer(trainerId);
+        return trainingService.selectAllTrainingsByTrainer(trainerId);
     }
 
 }

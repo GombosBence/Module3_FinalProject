@@ -28,7 +28,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Autowired
-    public void setTraineeDao(TrainerDao trainerDao) {
+    public void setTrainerDao(TrainerDao trainerDao) {
         this.trainerDao = trainerDao;
     }
 
