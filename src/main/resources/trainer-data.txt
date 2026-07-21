@@ -1,0 +1,3 @@
+# id|firstName|lastName|username|password|isActive|specialization
+1|Mike|Wilson|Mike.Wilson|qW1eR2tY3u|true|FITNESS
+2|Sara|Connor|Sara.Connor|zX9cV8bN7m|true|YOGA

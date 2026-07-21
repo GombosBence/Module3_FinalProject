@@ -14,6 +14,7 @@ public abstract class User {
     private String password;
     private boolean isActive;
 
+    public User(){}
 
     protected User(String firstName, String lastName, String username, String password) {
         this.firstName = firstName;
