@@ -1,3 +1,3 @@
 # id|firstName|lastName|username|password|isActive|address|dateOfBirth
-1|John|Doe|John.Doe|aB3dE9kLmQ|true|123 Main St, Springfield|#?W4123~~
-2|Alice|Brown|Alice.Brown|xT7pQ2wZaR|true|45 Oak Avenue, Shelbyville|1998-11-02
+1|John|Doe|John.Doe|$2a$12$5fLyhfJbICCotJcfVvBVW.u/rotqJmXlTGp0JU3OCLsxfs28w10ma|true|123 Main St, Springfield|#?W4123~~
+2|Alice|Brown|Alice.Brown|$2a$12$T1cdz5eFM9U4dqPWtReMZOQtKTrSr4gf8R1ohYIid9ax7QRf1ZkLS|true|45 Oak Avenue, Shelbyville|1998-11-02

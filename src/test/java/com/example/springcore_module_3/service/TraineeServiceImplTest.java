@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
@@ -38,6 +39,9 @@ public class TraineeServiceImplTest {
     @Mock
     private PasswordGenerator passwordGenerator;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
 
     private TraineeServiceImpl traineeService;
 
@@ -48,6 +52,7 @@ public class TraineeServiceImplTest {
         traineeService.setTrainerDao(trainerDao);
         traineeService.setUsernameGenerator(usernameGenerator);
         traineeService.setPasswordGenerator(passwordGenerator);
+        traineeService.setPasswordEncoder(passwordEncoder);
     }
 
 
@@ -61,10 +66,10 @@ public class TraineeServiceImplTest {
                 LocalDate.of(1989, 4,11));
 
         assertEquals("John.Doe", result.getUsername());
-        assertEquals("ABCDE12345", result.getPassword());
         assertEquals("Budapest main street 1", result.getAddress());
         assertEquals(LocalDate.of(1989,4,11), result.getDateOfBirth());
         verify(passwordGenerator).generatePassword(10);
+        verify(passwordEncoder).encode("ABCDE12345");
         verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), any());
         verify(traineeDao).create(result);
     }

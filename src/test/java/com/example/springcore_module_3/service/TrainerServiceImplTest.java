@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -39,6 +40,9 @@ public class TrainerServiceImplTest {
     @Mock
     private UsernameGenerator usernameGenerator;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private TrainerServiceImpl trainerService;
 
     @BeforeEach
@@ -48,6 +52,7 @@ public class TrainerServiceImplTest {
         trainerService.setTrainerDao(trainerDao);
         trainerService.setPasswordGenerator(passwordGenerator);
         trainerService.setUsernameGenerator(usernameGenerator);
+        trainerService.setPasswordEncoder(passwordEncoder);
     }
 
     @Test
@@ -58,9 +63,9 @@ public class TrainerServiceImplTest {
         Trainer trainer = trainerService.createTrainerProfile("John", "Doe", TrainingType.FITNESS);
 
         assertEquals("John.Doe", trainer.getUsername());
-        assertEquals("ABCDE12345", trainer.getPassword());
         assertEquals(TrainingType.FITNESS, trainer.getSpecialization());
         verify(passwordGenerator).generatePassword(10);
+        verify(passwordEncoder).encode("ABCDE12345");
         verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), any());
         verify(trainerDao).create(trainer);
     }

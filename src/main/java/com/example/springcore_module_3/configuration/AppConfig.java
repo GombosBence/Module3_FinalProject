@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,5 +36,10 @@ public class AppConfig {
     @Bean(name = "trainingStorage")
     public Map<Long, Training> trainingStorage(){
         return new HashMap<>();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder  passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 }

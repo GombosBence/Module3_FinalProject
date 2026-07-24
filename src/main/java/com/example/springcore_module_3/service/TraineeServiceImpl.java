@@ -7,6 +7,7 @@ import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ public class TraineeServiceImpl implements TraineeService {
     private TrainerDao trainerDao;
     private PasswordGenerator passwordGenerator;
     private UsernameGenerator usernameGenerator;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public void setTraineeDao(TraineeDao traineeDao) {
@@ -42,6 +44,11 @@ public class TraineeServiceImpl implements TraineeService {
         this.usernameGenerator = usernameGenerator;
     }
 
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
     public Trainee createTraineeProfile(String firstName, String lastName, String address, LocalDate dateOfBirth) {
         String password = passwordGenerator.generatePassword(10);
@@ -49,6 +56,7 @@ public class TraineeServiceImpl implements TraineeService {
                 (name) -> traineeDao.findByUsername(name).isPresent()
                                 || trainerDao.findByUsername(name).isPresent());
 
+        password = passwordEncoder.encode(password);
         Trainee newTrainee = new Trainee(firstName, lastName, username, password, address, dateOfBirth);
         traineeDao.create(newTrainee);
         log.info("Trainee created with username: {}", newTrainee.getUsername());

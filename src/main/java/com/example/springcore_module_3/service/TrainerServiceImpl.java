@@ -8,6 +8,7 @@ import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -20,6 +21,7 @@ public class TrainerServiceImpl implements TrainerService {
     private TraineeDao traineeDao;
     private PasswordGenerator passwordGenerator;
     private UsernameGenerator usernameGenerator;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public void setTraineeDao(TraineeDao traineeDao) {
@@ -40,6 +42,10 @@ public class TrainerServiceImpl implements TrainerService {
     public void setUsernameGenerator(UsernameGenerator usernameGenerator) {
         this.usernameGenerator = usernameGenerator;
     }
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public Trainer createTrainerProfile(String firstName, String lastName, TrainingType trainingType) {
@@ -48,6 +54,7 @@ public class TrainerServiceImpl implements TrainerService {
                 (name) -> trainerDao.findByUsername(name).isPresent()
                                 || traineeDao.findByUsername(name).isPresent());
 
+        password = passwordEncoder.encode(password);
         Trainer newTrainer = new Trainer(firstName, lastName, username, password, trainingType);
         trainerDao.create(newTrainer);
         log.info("Trainer created with username: {}", newTrainer.getUsername());
