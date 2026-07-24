@@ -2,6 +2,7 @@ package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.dao.TraineeDao;
 import com.example.springcore_module_3.dao.TrainerDao;
+import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.util.PasswordGenerator;
@@ -9,11 +10,13 @@ import com.example.springcore_module_3.util.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +59,9 @@ public class TrainerServiceImplTest {
 
         assertEquals("John.Doe", trainer.getUsername());
         assertEquals("ABCDE12345", trainer.getPassword());
+        assertEquals(TrainingType.FITNESS, trainer.getSpecialization());
+        verify(passwordGenerator).generatePassword(10);
+        verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), any());
         verify(trainerDao).create(trainer);
     }
 
@@ -115,6 +121,23 @@ public class TrainerServiceImplTest {
         when(trainerDao.findByUsername("John.Doe")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> trainerService.selectTrainerProfileByUsername("John.Doe"));
+    }
+
+    @Test
+    void verifyPredicateTrainerProfileSuccessTest(){
+        when(usernameGenerator.generateUsername(eq("John"), eq("Doe"), any())).thenReturn("John.Doe");
+        when(passwordGenerator.generatePassword(10)).thenReturn("ABCDE12345");
+
+        trainerService.createTrainerProfile("John", "Doe", TrainingType.FITNESS);
+
+        ArgumentCaptor<Predicate<String>> captor = ArgumentCaptor.forClass(Predicate.class);
+        verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), captor.capture());
+        Predicate<String> p =  captor.getValue();
+        when(trainerDao.findByUsername("taken")).thenReturn(Optional.empty());
+        assertFalse(p.test("taken"));
+        when(trainerDao.findByUsername("free")).thenReturn(Optional.of(new Trainer()));
+        assertTrue(p.test("free"));;
+
     }
 
 }

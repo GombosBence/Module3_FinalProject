@@ -8,12 +8,14 @@ import com.example.springcore_module_3.util.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,6 +62,10 @@ public class TraineeServiceImplTest {
 
         assertEquals("John.Doe", result.getUsername());
         assertEquals("ABCDE12345", result.getPassword());
+        assertEquals("Budapest main street 1", result.getAddress());
+        assertEquals(LocalDate.of(1989,4,11), result.getDateOfBirth());
+        verify(passwordGenerator).generatePassword(10);
+        verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), any());
         verify(traineeDao).create(result);
     }
 
@@ -140,6 +146,23 @@ public class TraineeServiceImplTest {
         when(traineeDao.findByUsername("John.Doe")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfileByUsername("John.Doe"));
+    }
+
+    @Test void verifyPredicateTraineeProfileSuccessTest() {
+        when(usernameGenerator.generateUsername(eq("John"), eq("Doe"), any()))
+                .thenReturn("John.Doe");
+        when(passwordGenerator.generatePassword(10)).thenReturn("ABCDE12345");
+
+        traineeService.createTraineeProfile("John", "Doe", "Budapest main street 1",
+                LocalDate.of(1989, 4,11));
+
+        ArgumentCaptor<Predicate<String>> captor = ArgumentCaptor.forClass(Predicate.class);
+        verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), captor.capture());
+        Predicate<String> p =  captor.getValue();
+        when(traineeDao.findByUsername("taken")).thenReturn(Optional.empty());
+        assertFalse(p.test("taken"));
+        when(traineeDao.findByUsername("free")).thenReturn(Optional.of(new Trainee()));
+        assertTrue(p.test("free"));
     }
 
 }

@@ -35,4 +35,26 @@ public class StorageInitializerTest {
         assertSame(otherBean, result);
     }
 
+    @Test
+    void storageRemainsEmptyOnMissingResourceTest(){
+        StorageInitializer initializer = new StorageInitializer();
+        ReflectionTestUtils.setField(initializer, "traineeDataFile", "invalid-path.txt");
+
+        Map<Long, Trainee> storage = new HashMap<>();
+        assertDoesNotThrow(() -> initializer.postProcessBeforeInitialization(storage, "traineeStorage"));
+
+        assertTrue(storage.isEmpty());
+    }
+
+    @Test
+    void malformedStorageTest(){
+        StorageInitializer initializer = new StorageInitializer();
+        ReflectionTestUtils.setField(initializer, "traineeDataFile", "test-data/malformed-test.txt");
+
+        Map<Long, Trainee> storage = new HashMap<>();
+        assertThrows(IllegalStateException.class, () -> initializer.postProcessBeforeInitialization(storage, "traineeStorage"));
+    }
+
+
+
 }
