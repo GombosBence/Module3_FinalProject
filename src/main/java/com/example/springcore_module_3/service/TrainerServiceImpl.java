@@ -6,6 +6,7 @@ import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
+import com.example.springcore_module_3.util.UsernameRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ public class TrainerServiceImpl implements TrainerService {
     private PasswordGenerator passwordGenerator;
     private UsernameGenerator usernameGenerator;
     private PasswordEncoder passwordEncoder;
+    private UsernameRegistry usernameRegistry;
 
     @Autowired
     public void setTraineeDao(TraineeDao traineeDao) {
@@ -48,13 +50,15 @@ public class TrainerServiceImpl implements TrainerService {
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
+    @Autowired
+    public void setUsernameRegistry(UsernameRegistry usernameRegistry) {
+        this.usernameRegistry = usernameRegistry;
+    }
 
     @Override
     public Trainer createTrainerProfile(String firstName, String lastName, TrainingType trainingType) {
         String password = passwordGenerator.generatePassword(10);
-        String username = usernameGenerator.generateUsername(firstName, lastName,
-                (name) -> trainerDao.findByUsername(name).isPresent()
-                                || traineeDao.findByUsername(name).isPresent());
+        String username = usernameGenerator.generateUsername(firstName, lastName, usernameRegistry::tryReserve);
 
         password = passwordEncoder.encode(password);
         Trainer newTrainer = new Trainer(firstName, lastName, username, password, trainingType);

@@ -7,6 +7,7 @@ import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
+import com.example.springcore_module_3.util.UsernameRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,9 @@ public class TrainerServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private UsernameRegistry usernameRegistry;
+
     private TrainerServiceImpl trainerService;
 
     @BeforeEach
@@ -53,6 +57,7 @@ public class TrainerServiceImplTest {
         trainerService.setPasswordGenerator(passwordGenerator);
         trainerService.setUsernameGenerator(usernameGenerator);
         trainerService.setPasswordEncoder(passwordEncoder);
+        trainerService.setUsernameRegistry(usernameRegistry);
     }
 
     @Test
@@ -126,23 +131,6 @@ public class TrainerServiceImplTest {
         when(trainerDao.findByUsername("John.Doe")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> trainerService.selectTrainerProfileByUsername("John.Doe"));
-    }
-
-    @Test
-    void verifyPredicateTrainerProfileSuccessTest(){
-        when(usernameGenerator.generateUsername(eq("John"), eq("Doe"), any())).thenReturn("John.Doe");
-        when(passwordGenerator.generatePassword(10)).thenReturn("ABCDE12345");
-
-        trainerService.createTrainerProfile("John", "Doe", TrainingType.FITNESS);
-
-        ArgumentCaptor<Predicate<String>> captor = ArgumentCaptor.forClass(Predicate.class);
-        verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), captor.capture());
-        Predicate<String> p =  captor.getValue();
-        when(trainerDao.findByUsername("taken")).thenReturn(Optional.empty());
-        assertFalse(p.test("taken"));
-        when(trainerDao.findByUsername("free")).thenReturn(Optional.of(new Trainer()));
-        assertTrue(p.test("free"));;
-
     }
 
 }

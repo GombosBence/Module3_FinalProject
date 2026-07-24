@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 @ComponentScan(basePackages = "com.example.springcore_module_3")
@@ -25,17 +26,17 @@ public class AppConfig {
 
     @Bean(name = "traineeStorage")
     public Map<Long, Trainee> traineeStorage(){
-        return new HashMap<>();
+        return new ConcurrentHashMap<>();
     }
 
     @Bean(name = "trainerStorage")
     public Map<Long, Trainer> trainerStorage(){
-        return new HashMap<>();
+        return new ConcurrentHashMap<>();
     }
 
     @Bean(name = "trainingStorage")
     public Map<Long, Training> trainingStorage(){
-        return new HashMap<>();
+        return new ConcurrentHashMap<>();
     }
 
     @Bean

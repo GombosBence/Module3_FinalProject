@@ -5,6 +5,7 @@ import com.example.springcore_module_3.dao.TrainerDao;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
+import com.example.springcore_module_3.util.UsernameRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,9 @@ public class TraineeServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private UsernameRegistry usernameRegistry;
+
 
     private TraineeServiceImpl traineeService;
 
@@ -53,6 +57,7 @@ public class TraineeServiceImplTest {
         traineeService.setUsernameGenerator(usernameGenerator);
         traineeService.setPasswordGenerator(passwordGenerator);
         traineeService.setPasswordEncoder(passwordEncoder);
+        traineeService.setUsernameRegistry(usernameRegistry);
     }
 
 
@@ -151,23 +156,6 @@ public class TraineeServiceImplTest {
         when(traineeDao.findByUsername("John.Doe")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfileByUsername("John.Doe"));
-    }
-
-    @Test void verifyPredicateTraineeProfileSuccessTest() {
-        when(usernameGenerator.generateUsername(eq("John"), eq("Doe"), any()))
-                .thenReturn("John.Doe");
-        when(passwordGenerator.generatePassword(10)).thenReturn("ABCDE12345");
-
-        traineeService.createTraineeProfile("John", "Doe", "Budapest main street 1",
-                LocalDate.of(1989, 4,11));
-
-        ArgumentCaptor<Predicate<String>> captor = ArgumentCaptor.forClass(Predicate.class);
-        verify(usernameGenerator).generateUsername(eq("John"), eq("Doe"), captor.capture());
-        Predicate<String> p =  captor.getValue();
-        when(traineeDao.findByUsername("taken")).thenReturn(Optional.empty());
-        assertFalse(p.test("taken"));
-        when(traineeDao.findByUsername("free")).thenReturn(Optional.of(new Trainee()));
-        assertTrue(p.test("free"));
     }
 
 }
