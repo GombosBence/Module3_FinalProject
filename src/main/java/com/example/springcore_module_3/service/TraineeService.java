@@ -1,15 +1,18 @@
 package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.model.Trainee;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 
 import java.time.LocalDate;
 
 public interface TraineeService {
 
-    Trainee createTraineeProfile(String firstName, String lastName, String address, LocalDate dateOfBirth);
-    void updateTraineeProfile(Trainee trainee);
-    void deleteTraineeProfile(Long id);
-    Trainee selectTraineeProfile(Long id);
-    Trainee selectTraineeProfileByUsername(String username);
+    Trainee createTraineeProfile(@NotBlank String firstName, @NotBlank String lastName, @NotBlank String address, @Past LocalDate dateOfBirth);
+    void updateTraineeProfile(@NotNull Trainee trainee);
+    void deleteTraineeProfile(@NotNull Long id);
+    Trainee selectTraineeProfile(@NotNull Long id);
+    Trainee selectTraineeProfileByUsername(@NotBlank String username);
 
 }

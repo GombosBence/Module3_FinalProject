@@ -8,6 +8,7 @@ import com.example.springcore_module_3.model.TrainingType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
+@Validated
 @Service
 public class TrainingServiceImpl implements TrainingService {
 
