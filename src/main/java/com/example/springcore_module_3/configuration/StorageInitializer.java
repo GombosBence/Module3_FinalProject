@@ -5,6 +5,7 @@ import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.Training;
 import com.example.springcore_module_3.model.TrainingType;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.ClassPathResource;
@@ -35,7 +36,7 @@ public class StorageInitializer implements BeanPostProcessor{
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(@NonNull Object bean, String beanName) throws BeansException {
         switch (beanName){
             case "traineeStorage" -> loadTrainees((Map<Long, Trainee>)  bean);
             case "trainerStorage" -> loadTrainers((Map<Long, Trainer>)  bean);

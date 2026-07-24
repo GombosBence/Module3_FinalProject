@@ -21,4 +21,5 @@ public class Trainee extends User{
         this.dateOfBirth = dateOfBirth;
     }
 
+
 }

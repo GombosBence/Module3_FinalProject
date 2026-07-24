@@ -49,9 +49,9 @@ public class TraineeDaoImplTest {
 
     @Test
     void create_doesntReuseId_afterDeleteMiddleRecord(){
-        Trainee trainee1 = dao.create(sampleTrainee("John", "Smith"));
+        dao.create(sampleTrainee("John", "Smith"));
         Trainee trainee2 = dao.create(sampleTrainee("John", "Doe"));
-        Trainee trainee3 = dao.create(sampleTrainee("Thomas", "Anderson"));
+        dao.create(sampleTrainee("Thomas", "Anderson"));
 
         Optional<Trainee> deleted = dao.delete(trainee2.getUserId());
         Trainee trainee4 = dao.create(sampleTrainee("New", "Trainee"));
