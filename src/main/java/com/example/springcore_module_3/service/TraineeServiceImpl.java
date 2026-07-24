@@ -79,6 +79,19 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    public void deactivateTraineeProfile(Long id) {
+        Trainee trainee = traineeDao.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Attempted to deactivate non-existing trainee id={}", id);
+                    return new NoSuchElementException("Trainee with id " + id + " does not exist");
+                });
+
+        trainee.setActive(false);
+        traineeDao.update(trainee);
+        log.info("Trainee id={} deactivated", id);
+    }
+
+    @Override
     public void deleteTraineeProfile(Long id) {
         Optional<Trainee> traineeOptional = traineeDao.delete(id);
         if(traineeOptional.isEmpty()){

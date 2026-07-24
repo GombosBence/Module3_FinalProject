@@ -85,4 +85,8 @@ public class GymFacade {
         return trainingService.selectAllTrainingsByTrainer(trainerId);
     }
 
+    public void deactivateTrainee(Long id) {
+        traineeService.deactivateTraineeProfile(id);
+    }
+
 }

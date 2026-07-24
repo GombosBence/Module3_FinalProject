@@ -22,8 +22,7 @@ import java.util.function.Predicate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TraineeServiceImplTest {
@@ -156,6 +155,30 @@ public class TraineeServiceImplTest {
         when(traineeDao.findByUsername("John.Doe")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfileByUsername("John.Doe"));
+    }
+
+    @Test
+    void deactivateTraineeProfile_setsInactive_whenTraineeExists() {
+        Trainee trainee = new Trainee();
+        trainee.setUserId(1L);
+        trainee.setActive(true);
+        when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
+        when(traineeDao.update(trainee)).thenReturn(true);
+
+        assertDoesNotThrow(() -> traineeService.deactivateTraineeProfile(1L));
+
+        assertFalse(trainee.isActive());
+        verify(traineeDao).update(trainee);
+    }
+
+    @Test
+    void deactivateTraineeProfile_throws_whenTraineeDoesNotExist() {
+        when(traineeDao.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class,
+                () -> traineeService.deactivateTraineeProfile(999L));
+
+        verify(traineeDao, never()).update(any());
     }
 
 }
