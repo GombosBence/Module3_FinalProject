@@ -81,6 +81,7 @@ public class GymFacade {
         return trainingService.selectAllTrainingsByTrainee(traineeId);
     }
 
+
     public List<Training> getTrainingsByTrainerId(Long trainerId) {
         return trainingService.selectAllTrainingsByTrainer(trainerId);
     }
