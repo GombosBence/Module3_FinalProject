@@ -1,9 +1,7 @@
 package com.example.springcore_module_3.facade;
 
-import com.example.springcore_module_3.model.Trainee;
-import com.example.springcore_module_3.model.Trainer;
-import com.example.springcore_module_3.model.Training;
-import com.example.springcore_module_3.model.TrainingType;
+import com.example.springcore_module_3.dto.*;
+import com.example.springcore_module_3.model.*;
 import com.example.springcore_module_3.service.TraineeService;
 import com.example.springcore_module_3.service.TrainerService;
 import com.example.springcore_module_3.service.TrainingService;
@@ -19,75 +17,96 @@ import java.util.List;
 public class GymFacade {
 
     private final TraineeService traineeService;
-    private final TrainingService trainingService;
     private final TrainerService trainerService;
+    private final TrainingService trainingService;
 
-    public GymFacade(TraineeService traineeService, TrainingService trainingService, TrainerService trainerService) {
+    public GymFacade(TraineeService traineeService, TrainerService trainerService, TrainingService trainingService) {
         this.traineeService = traineeService;
-        this.trainingService = trainingService;
         this.trainerService = trainerService;
-        log.debug("GymFacade initialized with services");
+        this.trainingService = trainingService;
     }
 
-    //Trainee
-    public Trainee createTrainee(String firstName, String lastName, String address, LocalDate dateOfBirth) {
-        return traineeService.createTraineeProfile(firstName, lastName, address, dateOfBirth);
+    // --- Trainee ---
+
+    public TraineeCreationResultDto createTrainee(User user, String address, LocalDate dateOfBirth) {
+        return traineeService.createTraineeProfile(user, address, dateOfBirth);
     }
 
-    public void updateTrainee(Trainee trainee) {
-        traineeService.updateTraineeProfile(, trainee);
+    public void updateTrainee(AuthenticationRequestDto credentials, Trainee trainee) {
+        traineeService.updateTraineeProfile(credentials, trainee);
     }
 
-    public void deleteTrainee(Long id) {
-        traineeService.deleteTraineeProfile(, id);
+    public void activateTrainee(AuthenticationRequestDto credentials, Long id) {
+        traineeService.activateTraineeProfile(credentials, id);
     }
 
-    public Trainee getTraineeById(Long id) {
-        return traineeService.selectTraineeProfile(, id);
+    public void deactivateTrainee(AuthenticationRequestDto credentials, Long id) {
+        traineeService.deactivateTraineeProfile(credentials, id);
     }
 
-    public Trainee getTraineeByUsername(String username) {
-        return traineeService.selectTraineeProfileByUsername(, username);
+    public void deleteTrainee(AuthenticationRequestDto credentials, String username) {
+        traineeService.deleteTraineeProfile(credentials, username);
     }
 
-    //Trainer
-    public Trainer createTrainer(String firstName, String lastName, TrainingType trainingType) {
-        return trainerService.createTrainerProfile(, firstName, trainingType);
+    public Trainee getTrainee(AuthenticationRequestDto credentials, Long id) {
+        return traineeService.selectTraineeProfile(credentials, id);
     }
 
-    public void updateTrainer(Trainer trainer) {
-        trainerService.updateTrainerProfile(, trainer);
+    public Trainee getTraineeByUsername(AuthenticationRequestDto credentials, String username) {
+        return traineeService.selectTraineeProfileByUsername(credentials, username);
     }
 
-    public Trainer getTrainerById(Long id) {
-        return trainerService.selectTrainerProfile(, id);
+    public List<Trainer> getUnassignedTrainers(AuthenticationRequestDto credentials, String traineeUsername) {
+        return traineeService.selectUnassignedTrainers(credentials, traineeUsername);
     }
 
-    public Trainer getTrainerByUsername(String username) {
-        return trainerService.selectTrainerProfileByUsername(, username);
+    public void updateTraineeTrainers(AuthenticationRequestDto credentials, String traineeUsername, List<Long> trainerIds) {
+        traineeService.updateTraineeTrainers(credentials, traineeUsername, trainerIds);
     }
 
-    //Training
+    // --- Trainer ---
 
-    public Training createTraining(Long traineeId, Long trainerId, String trainingName, TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration) {
-        return trainingService.createTraining(, traineeId, trainerId, trainingName, trainingType, trainingDate, trainingDuration);
+    public TrainerCreationResultDto createTrainer(User user, TrainingType specialization) {
+        return trainerService.createTrainerProfile(user, specialization);
     }
 
-    public Training getTrainingById(Long id) {
-        return trainingService.getTrainingById(id);
+    public void updateTrainer(AuthenticationRequestDto credentials, Trainer trainer) {
+        trainerService.updateTrainerProfile(credentials, trainer);
     }
 
-    public List<Training> getTrainingsByTrainee(Long traineeId) {
-        return trainingService.selectTraineeTrainings(, traineeId, , , , );
+    public void activateTrainer(AuthenticationRequestDto credentials, Long id) {
+        trainerService.activateTrainerProfile(credentials, id);
     }
 
-
-    public List<Training> getTrainingsByTrainerId(Long trainerId) {
-        return trainingService.selectTrainerTrainings(, trainerId, , , );
+    public void deactivateTrainer(AuthenticationRequestDto credentials, Long id) {
+        trainerService.deactivateTrainerProfile(credentials, id);
     }
 
-    public void deactivateTrainee(Long id) {
-        traineeService.deactivateTraineeProfile(, id);
+    public Trainer getTrainer(AuthenticationRequestDto credentials, Long id) {
+        return trainerService.selectTrainerProfile(credentials, id);
     }
 
+    public Trainer getTrainerByUsername(AuthenticationRequestDto credentials, String username) {
+        return trainerService.selectTrainerProfileByUsername(credentials, username);
+    }
+
+    // --- Training ---
+
+    public Training createTraining(AuthenticationRequestDto credentials, Long traineeId, Long trainerId,
+                                   String trainingName, TrainingType trainingType, LocalDate trainingDate,
+                                   Duration trainingDuration) {
+        return trainingService.createTraining(credentials, traineeId, trainerId, trainingName,
+                trainingType, trainingDate, trainingDuration);
+    }
+
+    public List<Training> getTraineeTrainings(AuthenticationRequestDto credentials, String username,
+                                              LocalDate fromDate, LocalDate toDate, String trainerName,
+                                              TrainingType trainingType) {
+        return trainingService.selectTraineeTrainings(credentials, username, fromDate, toDate, trainerName, trainingType);
+    }
+
+    public List<Training> getTrainerTrainings(AuthenticationRequestDto credentials, String username,
+                                              LocalDate fromDate, LocalDate toDate, String traineeName) {
+        return trainingService.selectTrainerTrainings(credentials, username, fromDate, toDate, traineeName);
+    }
 }
