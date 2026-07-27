@@ -5,7 +5,6 @@ import com.example.springcore_module_3.dao.TrainerDao;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
-import com.example.springcore_module_3.util.UsernameRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

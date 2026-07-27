@@ -1,3 +1,0 @@
-# id|firstName|lastName|username|password|isActive|specialization
-1|Mike|Wilson|Mike.Wilson|$2a$12$SDhvn9BAOTOWCFM1ph2czeFhMdPFPBoOK0E555at4q2.rjjBwW2le|true|FITNESS
-2|Sara|Connor|Sara.Connor|$2a$12$.e/aVXy7xDHgq4GjG/dgYebQ6RmWOVAGADECWl6aOnlQqCKSnAm4m|true|YOGA

@@ -1,3 +1,0 @@
-# id|traineeId|trainerId|trainingName|trainingType|trainingDate|durationMinutes
-1|1|1|Morning Fitness Session|FITNESS|2026-01-10|60
-2|2|2|Evening Yoga Class|YOGA|2026-01-12|45

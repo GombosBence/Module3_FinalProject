@@ -1,3 +1,0 @@
-# id|firstName|lastName|username|password|isActive|address|dateOfBirth
-1|John|Doe|John.Doe|$2a$12$5pUhm8u8thLIY3gwPQ0FxOB6T5Rjdevgf/1mIh2VznmpkxJtPjHDm|true|123 Main St, Springfield|1995-04-12
-2|Alice|Brown|Alice.Brown|$2a$12$.iRX/CtmXMo5b.o/DiKer.EC/apY3mBWSJP5W8wXSKcB7WW3gIiTy|true|45 Oak Avenue, Shelbyville|1998-11-02

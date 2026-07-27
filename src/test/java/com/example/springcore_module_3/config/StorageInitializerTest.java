@@ -1,6 +1,5 @@
 package com.example.springcore_module_3.config;
 
-import com.example.springcore_module_3.configuration.StorageInitializer;
 import com.example.springcore_module_3.model.Trainee;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
