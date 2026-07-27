@@ -33,7 +33,6 @@ public class Trainee{
                     inverseJoinColumns = @JoinColumn(name = "trainer_id"))
     private List<Trainer> trainers = new ArrayList<>();
 
-
     public Trainee(){}
 
     public Trainee(User user, String address, LocalDate dateOfBirth) {

@@ -1,88 +1,123 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dao.TraineeDao;
-import com.example.springcore_module_3.dao.TrainerDao;
+import com.example.springcore_module_3.dto.TrainerCreationResultDto;
+import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
+import com.example.springcore_module_3.model.User;
+import com.example.springcore_module_3.repository.TrainerRepository;
+import com.example.springcore_module_3.repository.UserRepository;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
-import com.example.springcore_module_3.util.UsernameRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 
 @Slf4j
-@Validated
 @Service
 public class TrainerServiceImpl implements TrainerService {
 
-    private TrainerDao trainerDao;
-    private TraineeDao traineeDao;
-    private PasswordGenerator passwordGenerator;
-    private UsernameGenerator usernameGenerator;
-    private PasswordEncoder passwordEncoder;
-    private UsernameRegistry usernameRegistry;
+    private final TrainerRepository trainerRepository;
+    private final UserRepository userRepository;
+    private final PasswordGenerator passwordGenerator;
+    private final UsernameGenerator usernameGenerator;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public void setTraineeDao(TraineeDao traineeDao) {
-        this.traineeDao = traineeDao;
-    }
-
-    @Autowired
-    public void setTrainerDao(TrainerDao trainerDao) {
-        this.trainerDao = trainerDao;
-    }
-
-    @Autowired
-    public void setPasswordGenerator(PasswordGenerator passwordGenerator) {
+    public TrainerServiceImpl(TrainerRepository trainerRepository, PasswordGenerator passwordGenerator,
+                              UsernameGenerator usernameGenerator, PasswordEncoder encoder, UserRepository userRepository) {
+        this.trainerRepository = trainerRepository;
         this.passwordGenerator = passwordGenerator;
-    }
-
-    @Autowired
-    public void setUsernameGenerator(UsernameGenerator usernameGenerator) {
         this.usernameGenerator = usernameGenerator;
-    }
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
-    @Autowired
-    public void setUsernameRegistry(UsernameRegistry usernameRegistry) {
-        this.usernameRegistry = usernameRegistry;
+        this.passwordEncoder = encoder;
+        this.userRepository = userRepository;
     }
 
+
     @Override
-    public Trainer createTrainerProfile(String firstName, String lastName, TrainingType trainingType) {
+    public TrainerCreationResultDto createTrainerProfile(User user, TrainingType trainingType) {
         String password = passwordGenerator.generatePassword(10);
-        String username = usernameGenerator.generateUsername(firstName, lastName, usernameRegistry::tryReserve);
+        String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName(),
+                userRepository::existsByUsername);
 
-        password = passwordEncoder.encode(password);
-        Trainer newTrainer = new Trainer(firstName, lastName, username, password, trainingType);
-        trainerDao.create(newTrainer);
-        log.info("Trainer created with username: {}", newTrainer.getUsername());
-        return newTrainer;
+        String hashPassword = passwordEncoder.encode(password);
+        user.setPassword(hashPassword);
+        user.setUsername(username);
+        Trainer newTrainer = new Trainer(user, trainingType);
+        trainerRepository.save(newTrainer);
+        log.info("Trainer created with username: {}", username);
+        return new TrainerCreationResultDto(newTrainer, password);
     }
 
     @Override
+    @Transactional
     public void updateTrainerProfile(Trainer trainer) {
-        boolean result = trainerDao.update(trainer);
-        if(!result){
-            log.warn("Attempted to update a non-existing trainer id={}", trainer.getUserId());
-            throw new NoSuchElementException("Trainer not found");
+
+        Trainer original = trainerRepository.findByUserUsername(trainer.getUser().getUsername()).orElseThrow(() -> {
+            log.warn("Trainer not found with username: {}", trainer.getUser().getUsername());
+            return new NoSuchElementException("Trainer not found with username: " + trainer.getUser().getUsername());
+        });
+
+        if(!trainer.getUser().getFirstName().equals(original.getUser().getFirstName())
+            || !trainer.getUser().getLastName().equals(original.getUser().getLastName()))
+        {
+            log.info("Trainer last/first name changed -> creating new username");
+            String newUsername = usernameGenerator.generateUsername(trainer.getUser().getFirstName(), trainer.getUser().getLastName(), userRepository::existsByUsername);
+            original.getUser().setFirstName(trainer.getUser().getFirstName());
+            original.getUser().setLastName(trainer.getUser().getLastName());
+            original.getUser().setUsername(newUsername);
+            log.info("Trainer username regenerated: {} -> {}", trainer.getUser().getUsername(), newUsername);
         }
+        if(trainer.getSpecialization() != null) original.setSpecialization(trainer.getSpecialization());
+
+        trainerRepository.save(original);
+    }
+
+    @Override
+    @Transactional
+    public void deactivateTrainerProfile(Long id) {
+        Trainer trainer = trainerRepository.findById(id).orElseThrow(() -> {
+            log.warn("Trainer not found with id: {}", id);
+            return new NoSuchElementException("Trainer not found with id: " + id);
+        });
+
+        if(!trainer.getUser().isActive()){
+            log.warn("Attempted to deactivate an already inactive Trainer");
+            throw new InvalidStateTransitionException("Attempted to deactivate an already inactive Trainer");
+        }
+
+        trainer.getUser().setActive(false);
+        trainerRepository.save(trainer);
+        log.info("Trainer deactivated with username: {}", trainer.getUser().getUsername());
+    }
+
+    @Override
+    @Transactional
+    public void activateTrainerProfile(Long id) {
+        Trainer trainer = trainerRepository.findById(id).orElseThrow(() -> {
+            log.warn("Trainer not found with id : {}", id);
+            return new NoSuchElementException("Trainer not found with id: " + id);
+        });
+
+        if(trainer.getUser().isActive()){
+            log.warn("Attempted to activate an already active Trainer");
+            throw new InvalidStateTransitionException("Attempted to activate an already active Trainer");
+        }
+
+        trainer.getUser().setActive(true);
+        trainerRepository.save(trainer);
+        log.info("Trainer activated with username: {}", trainer.getUser().getUsername());
     }
 
     @Override
     public Trainer selectTrainerProfile(Long id) {
-        return trainerDao.findById(id).orElseThrow(() -> new NoSuchElementException("Trainer with id " + id + " does not exist"));
+        return trainerRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Trainer with id " + id + " does not exist"));
     }
 
     @Override
     public Trainer selectTrainerProfileByUsername(String username) {
-        return trainerDao.findByUsername(username).orElseThrow(() -> new NoSuchElementException("Trainer with username " + username + " does not exist"));
+        return trainerRepository.findByUserUsername(username).orElseThrow(() -> new NoSuchElementException("Trainer with username " + username + " does not exist"));
     }
 }

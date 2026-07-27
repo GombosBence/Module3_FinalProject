@@ -2,7 +2,6 @@ package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.dao.TraineeDao;
 import com.example.springcore_module_3.dao.TrainerDao;
-import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.util.PasswordGenerator;
@@ -11,14 +10,12 @@ import com.example.springcore_module_3.util.UsernameRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,7 +62,7 @@ public class TrainerServiceImplTest {
         when(usernameGenerator.generateUsername(eq("John"), eq("Doe"), any())).thenReturn("John.Doe");
         when(passwordGenerator.generatePassword(10)).thenReturn("ABCDE12345");
 
-        Trainer trainer = trainerService.createTrainerProfile("John", "Doe", TrainingType.FITNESS);
+        Trainer trainer = trainerService.createTrainerProfile(, "John", TrainingType.FITNESS);
 
         assertEquals("John.Doe", trainer.getUsername());
         assertEquals(TrainingType.FITNESS, trainer.getSpecialization());

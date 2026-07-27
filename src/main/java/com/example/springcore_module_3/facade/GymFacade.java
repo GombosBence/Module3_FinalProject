@@ -52,7 +52,7 @@ public class GymFacade {
 
     //Trainer
     public Trainer createTrainer(String firstName, String lastName, TrainingType trainingType) {
-        return trainerService.createTrainerProfile(firstName, lastName, trainingType);
+        return trainerService.createTrainerProfile(, firstName, trainingType);
     }
 
     public void updateTrainer(Trainer trainer) {
@@ -78,12 +78,12 @@ public class GymFacade {
     }
 
     public List<Training> getTrainingsByTrainee(Long traineeId) {
-        return trainingService.selectAllTrainingsByTrainee(traineeId);
+        return trainingService.selectTraineeTrainings(traineeId, , , , );
     }
 
 
     public List<Training> getTrainingsByTrainerId(Long trainerId) {
-        return trainingService.selectAllTrainingsByTrainer(trainerId);
+        return trainingService.selectTrainerTrainings(trainerId, , , );
     }
 
     public void deactivateTrainee(Long id) {

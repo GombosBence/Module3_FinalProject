@@ -122,7 +122,7 @@ public class TrainingServiceImplTest {
         );
         when(trainingDao.findAllByTrainee(1L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectAllTrainingsByTrainee(1L);
+        List<Training> result = trainingServiceImpl.selectTraineeTrainings(1L, , , , );
         assertEquals(trainingsList.size(), result.size());
     }
 
@@ -131,7 +131,7 @@ public class TrainingServiceImplTest {
         List<Training> trainingsList = List.of();
         when(trainingDao.findAllByTrainee(1L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectAllTrainingsByTrainee(1L);
+        List<Training> result = trainingServiceImpl.selectTraineeTrainings(1L, , , , );
         assertTrue(result.isEmpty());
     }
 
@@ -143,7 +143,7 @@ public class TrainingServiceImplTest {
         );
         when(trainingDao.findAllByTrainer(3L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectAllTrainingsByTrainer(3L);
+        List<Training> result = trainingServiceImpl.selectTrainerTrainings(3L, , , );
         assertEquals(trainingsList.size(), result.size());
     }
 
@@ -152,7 +152,7 @@ public class TrainingServiceImplTest {
         List<Training> trainingsList = List.of();
         when(trainingDao.findAllByTrainer(3L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectAllTrainingsByTrainer(3L);
+        List<Training> result = trainingServiceImpl.selectTrainerTrainings(3L, , , );
         assertTrue(result.isEmpty());
     }
 }

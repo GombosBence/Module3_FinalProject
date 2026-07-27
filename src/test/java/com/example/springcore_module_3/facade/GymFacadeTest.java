@@ -63,24 +63,24 @@ public class GymFacadeTest {
     void createTrainer_delegatesToTrainerService() {
         var expected = new com.example.springcore_module_3.model.Trainer();
         expected.setUsername("Mike.Wilson");
-        when(trainerService.createTrainerProfile("Mike", "Wilson", TrainingType.FITNESS))
+        when(trainerService.createTrainerProfile(, "Mike", TrainingType.FITNESS))
                 .thenReturn(expected);
 
         var result = gymFacade.createTrainer("Mike", "Wilson", TrainingType.FITNESS);
 
         assertEquals(expected, result);
-        verify(trainerService).createTrainerProfile("Mike", "Wilson", TrainingType.FITNESS);
+        verify(trainerService).createTrainerProfile(, "Mike", TrainingType.FITNESS);
     }
 
     @Test
     void getTrainingsByTrainee_delegatesToTrainingService_andReturnsList() {
         List<Training> expected = List.of(new Training(), new Training());
-        when(trainingService.selectAllTrainingsByTrainee(1L)).thenReturn(expected);
+        when(trainingService.selectTraineeTrainings(1L, , , , )).thenReturn(expected);
 
         List<Training> result = gymFacade.getTrainingsByTrainee(1L);
 
         assertEquals(expected, result);
-        verify(trainingService).selectAllTrainingsByTrainee(1L);
+        verify(trainingService).selectTraineeTrainings(1L, , , , );
     }
 
     @Test
