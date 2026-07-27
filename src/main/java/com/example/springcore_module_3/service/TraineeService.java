@@ -3,12 +3,14 @@ package com.example.springcore_module_3.service;
 import com.example.springcore_module_3.dto.AuthenticationRequestDto;
 import com.example.springcore_module_3.dto.TraineeCreationResultDto;
 import com.example.springcore_module_3.model.Trainee;
+import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface TraineeService {
 
@@ -19,5 +21,7 @@ public interface TraineeService {
     void deleteTraineeProfile(@NotNull AuthenticationRequestDto credentials,@NotNull String username);
     Trainee selectTraineeProfile(@NotNull AuthenticationRequestDto credentials,@NotNull Long id);
     Trainee selectTraineeProfileByUsername(@NotNull AuthenticationRequestDto credentials,@NotBlank String username);
+    List<Trainer> selectUnassignedTrainers(@NotNull AuthenticationRequestDto credentials, String username);
+    void updateTraineeTrainers(@NotNull AuthenticationRequestDto credentials, @NotNull String username, @NotNull List<Long> trainerIds);
 
 }

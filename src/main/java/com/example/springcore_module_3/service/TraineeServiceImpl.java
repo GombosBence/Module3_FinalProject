@@ -4,8 +4,10 @@ import com.example.springcore_module_3.dto.AuthenticationRequestDto;
 import com.example.springcore_module_3.dto.TraineeCreationResultDto;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.model.Trainee;
+import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.TraineeRepository;
+import com.example.springcore_module_3.repository.TrainerRepository;
 import com.example.springcore_module_3.repository.TrainingRepository;
 import com.example.springcore_module_3.repository.UserRepository;
 import com.example.springcore_module_3.util.PasswordGenerator;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -30,11 +33,13 @@ public class TraineeServiceImpl implements TraineeService {
     private final UsernameGenerator usernameGenerator;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationService authenticationService;
+    private final TrainerRepository trainerRepository;
 
 
     public TraineeServiceImpl(TraineeRepository traineeRepository, PasswordGenerator passwordGenerator,
                               UsernameGenerator usernameGenerator, PasswordEncoder passwordEncoder,
-                              AuthenticationService authenticationService, TrainingRepository trainingRepository, UserRepository userRepository) {
+                              AuthenticationService authenticationService, TrainingRepository trainingRepository, UserRepository userRepository,
+                              TrainerRepository trainerRepository) {
         this.traineeRepository = traineeRepository;
         this.passwordGenerator = passwordGenerator;
         this.usernameGenerator = usernameGenerator;
@@ -42,6 +47,7 @@ public class TraineeServiceImpl implements TraineeService {
         this.trainingRepository = trainingRepository;
         this.userRepository = userRepository;
         this.authenticationService = authenticationService;
+        this.trainerRepository = trainerRepository;
     }
 
     @Override
@@ -155,5 +161,27 @@ public class TraineeServiceImpl implements TraineeService {
     public Trainee selectTraineeProfileByUsername(@NotNull AuthenticationRequestDto credentials, String username) {
         authenticationService.authenticate(credentials.username(), credentials.password());
         return traineeRepository.findByUserUsername(username).orElseThrow(() -> new NoSuchElementException("Trainee with username " + username + " does not exist"));
+    }
+
+    @Override
+    public List<Trainer> selectUnassignedTrainers(AuthenticationRequestDto credentials, String username) {
+        authenticationService.authenticate(credentials.username(), credentials.password());
+        return trainerRepository.findUnassignedTrainers(username);
+    }
+
+    @Override
+    public void updateTraineeTrainers(AuthenticationRequestDto credentials, String username, List<Long> trainerIds) {
+        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), username);
+        Trainee trainee = traineeRepository.findByUserUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("Trainee with username " + username + " does not exist"));
+
+        List<Trainer> trainers = trainerRepository.findAllById(trainerIds);
+        if (trainers.size() != trainerIds.size()) {
+            throw new NoSuchElementException("One or more trainer IDs do not exist");
+        }
+
+        trainee.setTrainers(trainers);
+        traineeRepository.save(trainee);
+        log.info("Trainee username={} trainer list updated to {} trainer(s)", username, trainers.size());
     }
 }
