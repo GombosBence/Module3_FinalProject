@@ -1,5 +1,6 @@
 package com.example.springcore_module_3.service;
 
+import com.example.springcore_module_3.dto.AuthenticationRequestDto;
 import com.example.springcore_module_3.dto.TraineeCreationResultDto;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.User;
@@ -12,11 +13,11 @@ import java.time.LocalDate;
 public interface TraineeService {
 
     TraineeCreationResultDto createTraineeProfile(@NotNull User user, @NotBlank String address, @Past LocalDate dateOfBirth);
-    void updateTraineeProfile(@NotNull Trainee trainee);
-    void deactivateTraineeProfile(@NotNull Long id);
-    void activateTraineeProfile(@NotNull Long id);
-    void deleteTraineeProfile(@NotNull String username);
-    Trainee selectTraineeProfile(@NotNull Long id);
-    Trainee selectTraineeProfileByUsername(@NotBlank String username);
+    void updateTraineeProfile(@NotNull AuthenticationRequestDto credentials, @NotNull Trainee trainee);
+    void deactivateTraineeProfile(@NotNull AuthenticationRequestDto credentials, @NotNull Long id);
+    void activateTraineeProfile(@NotNull AuthenticationRequestDto credentials,@NotNull Long id);
+    void deleteTraineeProfile(@NotNull AuthenticationRequestDto credentials,@NotNull String username);
+    Trainee selectTraineeProfile(@NotNull AuthenticationRequestDto credentials,@NotNull Long id);
+    Trainee selectTraineeProfileByUsername(@NotNull AuthenticationRequestDto credentials,@NotBlank String username);
 
 }

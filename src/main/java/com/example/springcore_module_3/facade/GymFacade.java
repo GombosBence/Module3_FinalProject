@@ -35,19 +35,19 @@ public class GymFacade {
     }
 
     public void updateTrainee(Trainee trainee) {
-        traineeService.updateTraineeProfile(trainee);
+        traineeService.updateTraineeProfile(, trainee);
     }
 
     public void deleteTrainee(Long id) {
-        traineeService.deleteTraineeProfile(id);
+        traineeService.deleteTraineeProfile(, id);
     }
 
     public Trainee getTraineeById(Long id) {
-        return traineeService.selectTraineeProfile(id);
+        return traineeService.selectTraineeProfile(, id);
     }
 
     public Trainee getTraineeByUsername(String username) {
-        return traineeService.selectTraineeProfileByUsername(username);
+        return traineeService.selectTraineeProfileByUsername(, username);
     }
 
     //Trainer
@@ -56,21 +56,21 @@ public class GymFacade {
     }
 
     public void updateTrainer(Trainer trainer) {
-        trainerService.updateTrainerProfile(trainer);
+        trainerService.updateTrainerProfile(, trainer);
     }
 
     public Trainer getTrainerById(Long id) {
-        return trainerService.selectTrainerProfile(id);
+        return trainerService.selectTrainerProfile(, id);
     }
 
     public Trainer getTrainerByUsername(String username) {
-        return trainerService.selectTrainerProfileByUsername(username);
+        return trainerService.selectTrainerProfileByUsername(, username);
     }
 
     //Training
 
     public Training createTraining(Long traineeId, Long trainerId, String trainingName, TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration) {
-        return trainingService.createTraining(traineeId, trainerId, trainingName, trainingType, trainingDate, trainingDuration);
+        return trainingService.createTraining(, traineeId, trainerId, trainingName, trainingType, trainingDate, trainingDuration);
     }
 
     public Training getTrainingById(Long id) {
@@ -78,16 +78,16 @@ public class GymFacade {
     }
 
     public List<Training> getTrainingsByTrainee(Long traineeId) {
-        return trainingService.selectTraineeTrainings(traineeId, , , , );
+        return trainingService.selectTraineeTrainings(, traineeId, , , , );
     }
 
 
     public List<Training> getTrainingsByTrainerId(Long trainerId) {
-        return trainingService.selectTrainerTrainings(trainerId, , , );
+        return trainingService.selectTrainerTrainings(, trainerId, , , );
     }
 
     public void deactivateTrainee(Long id) {
-        traineeService.deactivateTraineeProfile(id);
+        traineeService.deactivateTraineeProfile(, id);
     }
 
 }

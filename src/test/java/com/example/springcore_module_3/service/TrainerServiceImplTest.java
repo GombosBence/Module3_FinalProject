@@ -78,7 +78,7 @@ public class TrainerServiceImplTest {
         trainer.setUserId(1L);
         when(trainerDao.update(trainer)).thenReturn(true);
 
-        assertDoesNotThrow(() -> trainerService.updateTrainerProfile(trainer));
+        assertDoesNotThrow(() -> trainerService.updateTrainerProfile(, trainer));
         verify(trainerDao).update(trainer);
     }
 
@@ -88,7 +88,7 @@ public class TrainerServiceImplTest {
         trainer.setUserId(999L);
         when(trainerDao.update(trainer)).thenReturn(false);
 
-        assertThrows(NoSuchElementException.class, () -> trainerService.updateTrainerProfile(trainer));
+        assertThrows(NoSuchElementException.class, () -> trainerService.updateTrainerProfile(, trainer));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class TrainerServiceImplTest {
         trainer.setUserId(1L);
         when(trainerDao.findById(1L)).thenReturn(Optional.of(trainer));
 
-        Trainer result = assertDoesNotThrow(() -> trainerService.selectTrainerProfile(1L));
+        Trainer result = assertDoesNotThrow(() -> trainerService.selectTrainerProfile(, 1L));
         assertEquals(1L, result.getUserId());
         verify(trainerDao).findById(1L);
     }
@@ -108,7 +108,7 @@ public class TrainerServiceImplTest {
         trainer.setUserId(999L);
         when(trainerDao.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> trainerService.selectTrainerProfile(999L));
+        assertThrows(NoSuchElementException.class, () -> trainerService.selectTrainerProfile(, 999L));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class TrainerServiceImplTest {
         trainer.setUsername("John.Doe");
         when(trainerDao.findByUsername("John.Doe")).thenReturn(Optional.of(trainer));
 
-        assertDoesNotThrow(() -> trainerService.selectTrainerProfileByUsername("John.Doe"));
+        assertDoesNotThrow(() -> trainerService.selectTrainerProfileByUsername(, "John.Doe"));
         verify(trainerDao).findByUsername("John.Doe");
     }
 
@@ -127,7 +127,7 @@ public class TrainerServiceImplTest {
         trainer.setUsername("John.Doe");
         when(trainerDao.findByUsername("John.Doe")).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> trainerService.selectTrainerProfileByUsername("John.Doe"));
+        assertThrows(NoSuchElementException.class, () -> trainerService.selectTrainerProfileByUsername(, "John.Doe"));
     }
 
 }

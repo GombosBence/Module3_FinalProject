@@ -63,8 +63,8 @@ public class TrainingServiceImplTest {
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
 
-        Training training = assertDoesNotThrow(() -> trainingServiceImpl.createTraining(1L, 3L, "Sample",
-                TrainingType.FITNESS, date, duration));
+        Training training = assertDoesNotThrow(() -> trainingServiceImpl.createTraining(, 1L, 3L,
+                "Sample", TrainingType.FITNESS, date, duration));
 
         assertEquals(1L, training.getTraineeId());
         assertEquals(3L, training.getTrainerId());
@@ -79,8 +79,8 @@ public class TrainingServiceImplTest {
     void createTraining_traineeDoesNotExistTest(){
         when(traineeDao.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.createTraining(1L, 3L, "Sample",
-                TrainingType.FITNESS, LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
+        assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.createTraining(, 1L, 3L,
+                "Sample", TrainingType.FITNESS, LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
     }
 
     @Test
@@ -90,8 +90,8 @@ public class TrainingServiceImplTest {
         when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
         when(trainerDao.findById(3L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.createTraining(1L, 3L, "Sample",
-                TrainingType.FITNESS, LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
+        assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.createTraining(, 1L, 3L,
+                "Sample", TrainingType.FITNESS, LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
 
     }
 
@@ -122,7 +122,7 @@ public class TrainingServiceImplTest {
         );
         when(trainingDao.findAllByTrainee(1L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectTraineeTrainings(1L, , , , );
+        List<Training> result = trainingServiceImpl.selectTraineeTrainings(, 1L, , , , );
         assertEquals(trainingsList.size(), result.size());
     }
 
@@ -131,7 +131,7 @@ public class TrainingServiceImplTest {
         List<Training> trainingsList = List.of();
         when(trainingDao.findAllByTrainee(1L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectTraineeTrainings(1L, , , , );
+        List<Training> result = trainingServiceImpl.selectTraineeTrainings(, 1L, , , , );
         assertTrue(result.isEmpty());
     }
 
@@ -143,7 +143,7 @@ public class TrainingServiceImplTest {
         );
         when(trainingDao.findAllByTrainer(3L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectTrainerTrainings(3L, , , );
+        List<Training> result = trainingServiceImpl.selectTrainerTrainings(, 3L, , , );
         assertEquals(trainingsList.size(), result.size());
     }
 
@@ -152,7 +152,7 @@ public class TrainingServiceImplTest {
         List<Training> trainingsList = List.of();
         when(trainingDao.findAllByTrainer(3L)).thenReturn(trainingsList);
 
-        List<Training> result = trainingServiceImpl.selectTrainerTrainings(3L, , , );
+        List<Training> result = trainingServiceImpl.selectTrainerTrainings(, 3L, , , );
         assertTrue(result.isEmpty());
     }
 }

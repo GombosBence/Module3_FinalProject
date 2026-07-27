@@ -9,7 +9,6 @@ import com.example.springcore_module_3.util.UsernameRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -84,7 +82,7 @@ public class TraineeServiceImplTest {
         trainee.setUserId(1L);
         when(traineeDao.update(trainee)).thenReturn(true);
 
-        assertDoesNotThrow(() -> traineeService.updateTraineeProfile(trainee));
+        assertDoesNotThrow(() -> traineeService.updateTraineeProfile(, trainee));
         verify(traineeDao).update(trainee);
     }
 
@@ -96,7 +94,7 @@ public class TraineeServiceImplTest {
 
         assertThrows(
                 NoSuchElementException.class
-                ,() -> traineeService.updateTraineeProfile(trainee));
+                ,() -> traineeService.updateTraineeProfile(, trainee));
     }
 
     @Test
@@ -105,7 +103,7 @@ public class TraineeServiceImplTest {
         trainee.setUserId(1L);
         when(traineeDao.delete(1L)).thenReturn(Optional.of(trainee));
 
-        assertDoesNotThrow(() -> traineeService.deleteTraineeProfile(1L));
+        assertDoesNotThrow(() -> traineeService.deleteTraineeProfile(, 1L));
         verify(traineeDao).delete(1L);
 
     }
@@ -116,7 +114,7 @@ public class TraineeServiceImplTest {
         trainee.setUserId(999L);
         when(traineeDao.delete(999L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> traineeService.deleteTraineeProfile(999L));
+        assertThrows(NoSuchElementException.class, () -> traineeService.deleteTraineeProfile(, 999L));
     }
 
     @Test
@@ -125,7 +123,7 @@ public class TraineeServiceImplTest {
         trainee.setUserId(1L);
         when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
 
-        assertDoesNotThrow(() -> traineeService.selectTraineeProfile(1L));
+        assertDoesNotThrow(() -> traineeService.selectTraineeProfile(, 1L));
         verify(traineeDao).findById(1L);
     }
 
@@ -135,7 +133,7 @@ public class TraineeServiceImplTest {
         trainee.setUserId(999L);
         when(traineeDao.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfile(999L));
+        assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfile(, 999L));
     }
 
     @Test
@@ -144,7 +142,7 @@ public class TraineeServiceImplTest {
         trainee.setUsername("John.Doe");
         when(traineeDao.findByUsername("John.Doe")).thenReturn(Optional.of(trainee));
 
-        assertDoesNotThrow(() -> traineeService.selectTraineeProfileByUsername("John.Doe"));
+        assertDoesNotThrow(() -> traineeService.selectTraineeProfileByUsername(, "John.Doe"));
         verify(traineeDao).findByUsername("John.Doe");
     }
 
@@ -154,7 +152,7 @@ public class TraineeServiceImplTest {
         trainee.setUsername("John.Doe");
         when(traineeDao.findByUsername("John.Doe")).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfileByUsername("John.Doe"));
+        assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfileByUsername(, "John.Doe"));
     }
 
     @Test
@@ -165,7 +163,7 @@ public class TraineeServiceImplTest {
         when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
         when(traineeDao.update(trainee)).thenReturn(true);
 
-        assertDoesNotThrow(() -> traineeService.deactivateTraineeProfile(1L));
+        assertDoesNotThrow(() -> traineeService.deactivateTraineeProfile(, 1L));
 
         assertFalse(trainee.isActive());
         verify(traineeDao).update(trainee);
@@ -176,7 +174,7 @@ public class TraineeServiceImplTest {
         when(traineeDao.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,
-                () -> traineeService.deactivateTraineeProfile(999L));
+                () -> traineeService.deactivateTraineeProfile(, 999L));
 
         verify(traineeDao, never()).update(any());
     }

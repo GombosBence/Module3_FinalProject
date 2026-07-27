@@ -56,7 +56,7 @@ public class GymFacadeTest {
     void deleteTrainee_delegatesToTraineeService() {
         gymFacade.deleteTrainee(5L);
 
-        verify(traineeService).deleteTraineeProfile(5L);
+        verify(traineeService).deleteTraineeProfile(, 5L);
     }
 
     @Test
@@ -75,12 +75,12 @@ public class GymFacadeTest {
     @Test
     void getTrainingsByTrainee_delegatesToTrainingService_andReturnsList() {
         List<Training> expected = List.of(new Training(), new Training());
-        when(trainingService.selectTraineeTrainings(1L, , , , )).thenReturn(expected);
+        when(trainingService.selectTraineeTrainings(, 1L, , , , )).thenReturn(expected);
 
         List<Training> result = gymFacade.getTrainingsByTrainee(1L);
 
         assertEquals(expected, result);
-        verify(trainingService).selectTraineeTrainings(1L, , , , );
+        verify(trainingService).selectTraineeTrainings(, 1L, , , , );
     }
 
     @Test
@@ -88,13 +88,13 @@ public class GymFacadeTest {
         Training expected = new Training();
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
-        when(trainingService.createTraining(1L, 3L, "Sample", TrainingType.FITNESS, date, duration))
+        when(trainingService.createTraining(, 1L, 3L, "Sample", TrainingType.FITNESS, date, duration))
                 .thenReturn(expected);
 
         Training result = gymFacade.createTraining(1L, 3L, "Sample", TrainingType.FITNESS, date, duration);
 
         assertEquals(expected, result);
-        verify(trainingService).createTraining(1L, 3L, "Sample", TrainingType.FITNESS, date, duration);
+        verify(trainingService).createTraining(, 1L, 3L, "Sample", TrainingType.FITNESS, date, duration);
     }
 
 }

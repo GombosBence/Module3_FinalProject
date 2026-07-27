@@ -1,5 +1,6 @@
 package com.example.springcore_module_3.service;
 
+import com.example.springcore_module_3.dto.AuthenticationRequestDto;
 import com.example.springcore_module_3.dto.TraineeCreationResultDto;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.model.Trainee;
@@ -9,7 +10,7 @@ import com.example.springcore_module_3.repository.TrainingRepository;
 import com.example.springcore_module_3.repository.UserRepository;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
-import com.example.springcore_module_3.util.UsernameRegistry;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,17 +29,19 @@ public class TraineeServiceImpl implements TraineeService {
     private final PasswordGenerator passwordGenerator;
     private final UsernameGenerator usernameGenerator;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationService authenticationService;
 
 
     public TraineeServiceImpl(TraineeRepository traineeRepository, PasswordGenerator passwordGenerator,
                               UsernameGenerator usernameGenerator, PasswordEncoder passwordEncoder,
-                              UsernameRegistry usernameRegistry, TrainingRepository trainingRepository, UserRepository userRepository) {
+                              AuthenticationService authenticationService, TrainingRepository trainingRepository, UserRepository userRepository) {
         this.traineeRepository = traineeRepository;
         this.passwordGenerator = passwordGenerator;
         this.usernameGenerator = usernameGenerator;
         this.passwordEncoder = passwordEncoder;
         this.trainingRepository = trainingRepository;
         this.userRepository = userRepository;
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -58,11 +61,13 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional
-    public void updateTraineeProfile(Trainee trainee) {
+    public void updateTraineeProfile(@NotNull AuthenticationRequestDto credentials, Trainee trainee) {
 
         Trainee original = traineeRepository.findByUserUsername(trainee.getUser().getUsername()).orElseThrow(() ->{
             log.warn("Trainee not found with username: {}", trainee.getUser().getUsername());
             return new NoSuchElementException("Trainee not found");});
+
+        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainee.getUser().getUsername());
 
         if(!original.getUser().getFirstName().equals(trainee.getUser().getFirstName())
             || !original.getUser().getLastName().equals(trainee.getUser().getLastName())) {
@@ -81,12 +86,16 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional
-    public void deactivateTraineeProfile(Long id) {
+    public void deactivateTraineeProfile(@NotNull AuthenticationRequestDto credentials, Long id) {
+
+        authenticationService.authenticate(credentials.username(), credentials.password());
         Trainee trainee = traineeRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Attempted to deactivate non-existing trainee id={}", id);
                     return new NoSuchElementException("Trainee with id " + id + " does not exist");
                 });
+
+        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainee.getUser().getUsername());
 
         if(!trainee.getUser().isActive()) {
             log.warn("Attempted to deactivate already inactive trainee id={}", id);
@@ -100,12 +109,15 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional
-    public void activateTraineeProfile(Long id) {
+    public void activateTraineeProfile(@NotNull AuthenticationRequestDto credentials, Long id) {
+
         Trainee trainee = traineeRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Attempted to activate non-existing trainee id={}", id);
                     return new NoSuchElementException("Trainee with id " + id + " does not exist");
                 });
+
+        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainee.getUser().getUsername());
 
         if(trainee.getUser().isActive()) {
             log.warn("Attempted to activate already active trainee id={}", id);
@@ -119,11 +131,14 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional
-    public void deleteTraineeProfile(String username) {
+    public void deleteTraineeProfile(@NotNull AuthenticationRequestDto credentials, String username) {
+
         Trainee trainee = traineeRepository.findByUserUsername(username).orElseThrow(() -> {
             log.warn("Attempted to delete non-existing trainee username={}", username);
             return new  NoSuchElementException("Trainee with username " + username + " does not exist");
         });
+
+        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainee.getUser().getUsername());
 
         trainingRepository.deleteAllByTraineeUserUsername(username);
         traineeRepository.delete(trainee);
@@ -131,12 +146,14 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
-    public Trainee selectTraineeProfile(Long id) {
+    public Trainee selectTraineeProfile(@NotNull AuthenticationRequestDto credentials, Long id) {
+        authenticationService.authenticate(credentials.username(), credentials.password());
         return traineeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Trainee with id " + id + " does not exist"));
     }
 
     @Override
-    public Trainee selectTraineeProfileByUsername(String username) {
+    public Trainee selectTraineeProfileByUsername(@NotNull AuthenticationRequestDto credentials, String username) {
+        authenticationService.authenticate(credentials.username(), credentials.password());
         return traineeRepository.findByUserUsername(username).orElseThrow(() -> new NoSuchElementException("Trainee with username " + username + " does not exist"));
     }
 }
