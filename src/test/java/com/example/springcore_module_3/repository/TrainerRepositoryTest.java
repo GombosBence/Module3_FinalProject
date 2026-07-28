@@ -92,7 +92,6 @@ public class TrainerRepositoryTest{
 
     @Test
     void addNewTraineeTrainer_persistenceTest(){
-
         trainee.getTrainers().add(unassignedTrainer);
         testEntityManager.persist(trainee);
         testEntityManager.flush();
@@ -100,10 +99,15 @@ public class TrainerRepositoryTest{
 
         Trainee reloaded = testEntityManager.find(Trainee.class, trainee.getTraineeId());
 
-        assert reloaded != null;
+        assertNotNull(reloaded);
         assertEquals(2, reloaded.getTrainers().size());
-        assertTrue(reloaded.getTrainers().contains(unassignedTrainer));
-        assertTrue(reloaded.getTrainers().contains(assignedTrainer));
+
+        List<Long> trainerIds = reloaded.getTrainers().stream()
+                .map(Trainer::getTrainerId)
+                .toList();
+
+        assertTrue(trainerIds.contains(assignedTrainer.getTrainerId()));
+        assertTrue(trainerIds.contains(unassignedTrainer.getTrainerId()));
     }
 
 }

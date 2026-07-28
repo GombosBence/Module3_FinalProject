@@ -1,8 +1,8 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dao.TraineeDao;
-import com.example.springcore_module_3.dao.TrainerDao;
-import com.example.springcore_module_3.dao.TrainingDao;
+import com.example.springcore_module_3.dto.AuthenticationRequestDto;
+import com.example.springcore_module_3.exception.AuthenticationFailedException;
+import com.example.springcore_module_3.repository.*;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.Training;
@@ -20,140 +20,134 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceImplTest {
 
     @Mock
-    private TrainingDao trainingDao;
-
+    private TrainingRepository trainingRepository;
     @Mock
-    private TraineeDao traineeDao;
-
+    private TraineeRepository traineeRepository;
     @Mock
-    private TrainerDao trainerDao;
+    private TrainerRepository trainerRepository;
+    @Mock
+    private AuthenticationService authenticationService;
 
-    private TrainingServiceImpl trainingServiceImpl;
+    private TrainingService trainingService;
 
     @BeforeEach
     public void setUp() {
-        trainingServiceImpl = new TrainingServiceImpl();
-        trainingServiceImpl.setTrainingDao(trainingDao);
-        trainingServiceImpl.setTraineeDao(traineeDao);
-        trainingServiceImpl.setTrainerDao(trainerDao);
+        trainingService = new TrainingServiceImpl(trainingRepository,traineeRepository, trainerRepository, authenticationService);
     }
 
-    private Training sampleTraining(Long traineeId, Long trainerId){
-        Training sampleTraining = new Training();
-        sampleTraining.setTraineeId(traineeId);
-        sampleTraining.setTrainerId(trainerId);
-        return sampleTraining;
+    private TrainingType fitness() {
+        TrainingType type = new TrainingType("FITNESS");
+        type.setTrainingTypeId(1L);
+        return type;
     }
 
     @Test
     void createTrainingSuccessTest(){
         Trainee trainee = new Trainee();
         Trainer trainer = new Trainer();
-        trainee.setUserId(1L);
-        trainer.setUserId(3L);
-        when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
-        when(trainerDao.findById(3L)).thenReturn(Optional.of(trainer));
+        trainee.setTraineeId(1L);
+        trainer.setTrainerId(3L);
+        TrainingType type = fitness();
+        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
+        when(trainerRepository.findById(3L)).thenReturn(Optional.of(trainer));
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
+        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
 
-        Training training = assertDoesNotThrow(() -> trainingServiceImpl.createTraining(, 1L, 3L,
-                "Sample", TrainingType.FITNESS, date, duration));
+        Training training = assertDoesNotThrow(() -> trainingService.createTraining(credentials, 1L, 3L,
+                "Sample", type, date, duration));
 
-        assertEquals(1L, training.getTraineeId());
-        assertEquals(3L, training.getTrainerId());
+        assertEquals(1L, training.getTrainee().getTraineeId());
+        assertEquals(3L, training.getTrainer().getTrainerId());
         assertEquals("Sample", training.getTrainingName());
-        assertEquals(TrainingType.FITNESS, training.getTrainingType());
+        assertEquals(type, training.getTrainingType());
         assertEquals(date, training.getTrainingDate());
         assertEquals(duration, training.getTrainingDuration());
-        verify(trainingDao).create(training);
+        verify(authenticationService).authenticate(credentials.username(), credentials.password());
+        verify(trainingRepository).save(training);
     }
 
     @Test
     void createTraining_traineeDoesNotExistTest(){
-        when(traineeDao.findById(1L)).thenReturn(Optional.empty());
+        when(traineeRepository.findById(1L)).thenReturn(Optional.empty());
+        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
 
-        assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.createTraining(, 1L, 3L,
-                "Sample", TrainingType.FITNESS, LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
+        assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, 1L, 3L,
+                "Sample", fitness(), LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
     }
 
     @Test
     void createTraining_trainerDoesNotExistTest(){
         Trainee trainee = new Trainee();
-        trainee.setUserId(1L);
-        when(traineeDao.findById(1L)).thenReturn(Optional.of(trainee));
-        when(trainerDao.findById(3L)).thenReturn(Optional.empty());
+        trainee.setTraineeId(1L);
+        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
+        when(trainerRepository.findById(3L)).thenReturn(Optional.empty());
+        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
 
-        assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.createTraining(, 1L, 3L,
-                "Sample", TrainingType.FITNESS, LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
+        assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, 1L, 3L,
+                "Sample", fitness(), LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
 
     }
 
     @Test
-    void findTrainingByIdSuccessTest(){
-        Training training = new Training();
-        training.setTrainingId(1L);
-        when(trainingDao.findById(1L)).thenReturn(Optional.of(training));
+    void selectTraineeTrainings_successfulTest(){
+        when(trainingRepository.findTraineeTrainings(any(),any(), any(),any(), any())).thenReturn(List.of(
+                new Training(),
+                new Training()
+        ));
+        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
 
-        assertDoesNotThrow(() -> trainingServiceImpl.getTrainingById(1L));
-        verify(trainingDao).findById(1L);
+        List<Training> list = trainingService.selectTraineeTrainings(credentials, "John.Doe", null, null, null, null);
+
+        assertFalse(list.isEmpty());
+        verify(trainingRepository).findTraineeTrainings(any(),any(), any(),any(), any());
+        verify(authenticationService).authenticate(credentials.username(), credentials.password());
     }
 
     @Test
-    void findTrainingByIdFailureTest(){
-        Training training = new Training();
-        training.setTrainingId(999L);
-        when(trainingDao.findById(999L)).thenReturn(Optional.empty());
+    void selectTrainee_AuthenticationFailedTest(){
 
-        assertThrows(NoSuchElementException.class, () -> trainingServiceImpl.getTrainingById(999L));
+        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        doThrow(AuthenticationFailedException.class).when(authenticationService).authenticate("John.Doe", "rawPw");
+
+        assertThrows(AuthenticationFailedException.class,
+                () -> trainingService.selectTraineeTrainings(credentials, "John.Doe", null, null, null, null));
+        verify(authenticationService).authenticate("John.Doe", "rawPw");
+        verify(trainingRepository, never()).findTraineeTrainings(any(), any(), any(), any(), any());
     }
 
     @Test
-    void findTrainingsByTraineeSuccessTest(){
-        List<Training> trainingsList = List.of(
-                sampleTraining(1L, 3L),
-                sampleTraining(1L, 1L)
-        );
-        when(trainingDao.findAllByTrainee(1L)).thenReturn(trainingsList);
+    void selectTrainerTrainings_successfulTest(){
+        when(trainingRepository.findTrainerTrainings(any(),any(), any(),any())).thenReturn(List.of(
+                new Training(),
+                new Training()
+        ));
+        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
 
-        List<Training> result = trainingServiceImpl.selectTraineeTrainings(, 1L, , , , );
-        assertEquals(trainingsList.size(), result.size());
+        List<Training> list = trainingService.selectTrainerTrainings(credentials, "John.Doe", null, null, null);
+
+        assertFalse(list.isEmpty());
+        verify(trainingRepository).findTrainerTrainings(any(),any(), any(),any());
+        verify(authenticationService).authenticate(credentials.username(), credentials.password());
     }
 
     @Test
-    void findTrainingsByTraineeEmptyTest(){
-        List<Training> trainingsList = List.of();
-        when(trainingDao.findAllByTrainee(1L)).thenReturn(trainingsList);
+    void selectTrainer_AuthenticationFailedTest(){
 
-        List<Training> result = trainingServiceImpl.selectTraineeTrainings(, 1L, , , , );
-        assertTrue(result.isEmpty());
-    }
+        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        doThrow(AuthenticationFailedException.class).when(authenticationService).authenticate("John.Doe", "rawPw");
 
-    @Test
-    void findTrainingsByTrainerSuccessTest(){
-        List<Training> trainingsList = List.of(
-                sampleTraining(2L, 3L),
-                sampleTraining(1L, 3L)
-        );
-        when(trainingDao.findAllByTrainer(3L)).thenReturn(trainingsList);
-
-        List<Training> result = trainingServiceImpl.selectTrainerTrainings(, 3L, , , );
-        assertEquals(trainingsList.size(), result.size());
-    }
-
-    @Test
-    void findTrainingsByTrainerEmptyTest(){
-        List<Training> trainingsList = List.of();
-        when(trainingDao.findAllByTrainer(3L)).thenReturn(trainingsList);
-
-        List<Training> result = trainingServiceImpl.selectTrainerTrainings(, 3L, , , );
-        assertTrue(result.isEmpty());
+        assertThrows(AuthenticationFailedException.class,
+                () -> trainingService.selectTrainerTrainings(credentials, "John.Doe", null, null, null));
+        verify(authenticationService).authenticate("John.Doe", "rawPw");
+        verify(trainingRepository, never()).findTrainerTrainings(any(), any(), any(), any());
     }
 }
 
