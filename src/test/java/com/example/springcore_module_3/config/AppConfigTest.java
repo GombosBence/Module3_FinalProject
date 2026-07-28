@@ -16,30 +16,6 @@ class AppConfigTest {
     private final AppConfig appConfig = new AppConfig();
 
     @Test
-    void traineeStorage_returnsEmptyConcurrentMap() {
-        Map<Long, Trainee> storage = appConfig.traineeStorage();
-
-        assertNotNull(storage);
-        assertTrue(storage.isEmpty());
-    }
-
-    @Test
-    void trainerStorage_returnsEmptyConcurrentMap() {
-        Map<Long, Trainer> storage = appConfig.trainerStorage();
-
-        assertNotNull(storage);
-        assertTrue(storage.isEmpty());
-    }
-
-    @Test
-    void trainingStorage_returnsEmptyConcurrentMap() {
-        Map<Long, Training> storage = appConfig.trainingStorage();
-
-        assertNotNull(storage);
-        assertTrue(storage.isEmpty());
-    }
-
-    @Test
     void passwordEncoder_returnsWorkingBCryptEncoder() {
         BCryptPasswordEncoder encoder = appConfig.passwordEncoder();
 
