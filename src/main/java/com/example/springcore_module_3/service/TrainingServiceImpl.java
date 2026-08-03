@@ -1,6 +1,6 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dto.AuthenticationRequestDto;
+import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.Training;
@@ -37,7 +37,7 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Override
     @Transactional
-    public Training createTraining(@NotNull AuthenticationRequestDto credentials, Long traineeId, Long trainerId, String trainingName, TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration) {
+    public Training createTraining(@NotNull AuthenticationRequest credentials, Long traineeId, Long trainerId, String trainingName, TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration) {
 
         authenticationService.authenticate(credentials.username(), credentials.password());
 
@@ -58,13 +58,13 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    public List<Training> selectTraineeTrainings(@NotNull AuthenticationRequestDto credentials, String username, LocalDate fromDate, LocalDate toDate, String trainerName, TrainingType trainingType) {
+    public List<Training> selectTraineeTrainings(@NotNull AuthenticationRequest credentials, String username, LocalDate fromDate, LocalDate toDate, String trainerName, TrainingType trainingType) {
         authenticationService.authenticate(credentials.username(), credentials.password());
         return trainingRepository.findTraineeTrainings(username, fromDate, toDate, trainerName, trainingType);
     }
 
     @Override
-    public List<Training> selectTrainerTrainings(@NotNull AuthenticationRequestDto credentials, String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
+    public List<Training> selectTrainerTrainings(@NotNull AuthenticationRequest credentials, String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         authenticationService.authenticate(credentials.username(), credentials.password());
         return trainingRepository.findTrainerTrainings(username, fromDate, toDate, traineeName);
     }

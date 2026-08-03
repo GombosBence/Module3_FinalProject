@@ -1,6 +1,6 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dto.AuthenticationRequestDto;
+import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.model.Trainer;
@@ -58,7 +58,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void updateTrainerProfile(@NotNull AuthenticationRequestDto credentials, Trainer trainer) {
+    public void updateTrainerProfile(@NotNull AuthenticationRequest credentials, Trainer trainer) {
 
         Trainer original = trainerRepository.findByUserUsername(trainer.getUser().getUsername()).orElseThrow(() -> {
             log.warn("Trainer not found with username: {}", trainer.getUser().getUsername());
@@ -76,7 +76,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void deactivateTrainerProfile(@NotNull AuthenticationRequestDto credentials, Long id) {
+    public void deactivateTrainerProfile(@NotNull AuthenticationRequest credentials, Long id) {
 
         Trainer trainer = trainerRepository.findById(id).orElseThrow(() -> {
             log.warn("Trainer not found with id: {}", id);
@@ -97,7 +97,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void activateTrainerProfile(@NotNull AuthenticationRequestDto credentials, Long id) {
+    public void activateTrainerProfile(@NotNull AuthenticationRequest credentials, Long id) {
 
         Trainer trainer = trainerRepository.findById(id).orElseThrow(() -> {
             log.warn("Trainer not found with id : {}", id);
@@ -117,13 +117,13 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
-    public Trainer selectTrainerProfile(@NotNull AuthenticationRequestDto credentials, Long id) {
+    public Trainer selectTrainerProfile(@NotNull AuthenticationRequest credentials, Long id) {
         authenticationService.authenticate(credentials.username(), credentials.password());
         return trainerRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Trainer with id " + id + " does not exist"));
     }
 
     @Override
-    public Trainer selectTrainerProfileByUsername(@NotNull AuthenticationRequestDto credentials, String username) {
+    public Trainer selectTrainerProfileByUsername(@NotNull AuthenticationRequest credentials, String username) {
         authenticationService.authenticate(credentials.username(), credentials.password());
         return trainerRepository.findByUserUsername(username).orElseThrow(() -> new NoSuchElementException("Trainer with username " + username + " does not exist"));
     }

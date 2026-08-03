@@ -14,6 +14,8 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
 
     Optional<Trainer> findByUserUsername(String username);
 
+    List<Trainer> findAllByUserUsernameIn(List<String> usernames);
+
     @Query("""
         SELECT tr FROM Trainer tr
         WHERE tr NOT IN (
