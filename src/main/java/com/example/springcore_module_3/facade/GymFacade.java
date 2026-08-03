@@ -3,6 +3,7 @@ package com.example.springcore_module_3.facade;
 import com.example.springcore_module_3.dto.*;
 import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.model.*;
+import com.example.springcore_module_3.service.AuthenticationService;
 import com.example.springcore_module_3.service.TraineeService;
 import com.example.springcore_module_3.service.TrainerService;
 import com.example.springcore_module_3.service.TrainingService;
@@ -20,11 +21,13 @@ public class GymFacade {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final TrainingService trainingService;
+    private final AuthenticationService authenticationService;
 
-    public GymFacade(TraineeService traineeService, TrainerService trainerService, TrainingService trainingService) {
+    public GymFacade(TraineeService traineeService, TrainerService trainerService, TrainingService trainingService, AuthenticationService authenticationService) {
         this.traineeService = traineeService;
         this.trainerService = trainerService;
         this.trainingService = trainingService;
+        this.authenticationService = authenticationService;
     }
 
     // --- Trainee ---
@@ -111,5 +114,14 @@ public class GymFacade {
     public List<Training> getTrainerTrainings(AuthenticationRequest credentials, String username,
                                               LocalDate fromDate, LocalDate toDate, String traineeName) {
         return trainingService.selectTrainerTrainings(credentials, username, fromDate, toDate, traineeName);
+    }
+
+    // --- Auth ---
+    public void changeUserPassword(String username, String oldPassword, String newPassword) {
+        authenticationService.changePassword(username, oldPassword, newPassword);
+    }
+
+    public void login(String username, String password) {
+        authenticationService.authenticate(username, password);
     }
 }

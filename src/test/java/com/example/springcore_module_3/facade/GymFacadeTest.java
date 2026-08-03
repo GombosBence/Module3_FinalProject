@@ -4,6 +4,7 @@ import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.model.*;
+import com.example.springcore_module_3.service.AuthenticationService;
 import com.example.springcore_module_3.service.TraineeService;
 import com.example.springcore_module_3.service.TrainerService;
 import com.example.springcore_module_3.service.TrainingService;
@@ -32,12 +33,14 @@ class GymFacadeTest {
     private TrainerService trainerService;
     @Mock
     private TrainingService trainingService;
+    @Mock
+    private AuthenticationService authenticationService;
 
     private GymFacade facade;
 
     @BeforeEach
     void setUp() {
-        facade = new GymFacade(traineeService, trainerService, trainingService);
+        facade = new GymFacade(traineeService, trainerService, trainingService, authenticationService);
     }
 
     @Test
