@@ -1,8 +1,8 @@
 package com.example.springcore_module_3.facade;
 
 import com.example.springcore_module_3.dto.AuthenticationRequestDto;
-import com.example.springcore_module_3.dto.TraineeCreationResultDto;
-import com.example.springcore_module_3.dto.TrainerCreationResultDto;
+import com.example.springcore_module_3.dto.TraineeCreationResult;
+import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.model.*;
 import com.example.springcore_module_3.service.TraineeService;
 import com.example.springcore_module_3.service.TrainerService;
@@ -42,12 +42,12 @@ class GymFacadeTest {
     void createTrainee_delegatesToTraineeService_withCorrectArgsAndReturnValue() {
         User user = new User("John", "Doe", null, null);
         LocalDate dob = LocalDate.of(2000, 1, 1);
-        TraineeCreationResultDto expected = new TraineeCreationResultDto(
+        TraineeCreationResult expected = new TraineeCreationResult(
                 new Trainee(user, "123 Main St", dob), "rawPassword123");
 
         when(traineeService.createTraineeProfile(user, "123 Main St", dob)).thenReturn(expected);
 
-        TraineeCreationResultDto result = facade.createTrainee(user, "123 Main St", dob);
+        TraineeCreationResult result = facade.createTrainee(user, "123 Main St", dob);
 
         assertEquals(expected, result);
         verify(traineeService).createTraineeProfile(user, "123 Main St", dob);
@@ -66,12 +66,12 @@ class GymFacadeTest {
     void createTrainer_delegatesToTrainerService_withCorrectArgsAndReturnValue() {
         User user = new User("Mike", "Wilson", null, null);
         TrainingType fitness = new TrainingType("FITNESS");
-        TrainerCreationResultDto expected = new TrainerCreationResultDto(
+        TrainerCreationResult expected = new TrainerCreationResult(
                 new Trainer(user, fitness), "rawPassword456");
 
         when(trainerService.createTrainerProfile(user, fitness)).thenReturn(expected);
 
-        TrainerCreationResultDto result = facade.createTrainer(user, fitness);
+        TrainerCreationResult result = facade.createTrainer(user, fitness);
 
         assertEquals(expected, result);
         verify(trainerService).createTrainerProfile(user, fitness);

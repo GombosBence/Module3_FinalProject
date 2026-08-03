@@ -1,7 +1,7 @@
 package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.dto.AuthenticationRequestDto;
-import com.example.springcore_module_3.dto.TraineeCreationResultDto;
+import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
@@ -82,7 +82,7 @@ public class TraineeServiceImplTest {
         when(passwordGenerator.generatePassword(10)).thenReturn("ABCDE12345");
 
         User user = new User("John", "Doe", "John.Doe", "ABCDE12345");
-        TraineeCreationResultDto result = traineeService.createTraineeProfile(user, "Budapest main street 1", LocalDate.of(1989, 4,11));
+        TraineeCreationResult result = traineeService.createTraineeProfile(user, "Budapest main street 1", LocalDate.of(1989, 4,11));
 
         assertEquals("John.Doe", result.trainee().getUser().getUsername());
         assertEquals("Budapest main street 1", result.trainee().getAddress());

@@ -1,7 +1,7 @@
 package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.dto.AuthenticationRequestDto;
-import com.example.springcore_module_3.dto.TraineeCreationResultDto;
+import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
@@ -51,10 +51,12 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
-    public TraineeCreationResultDto createTraineeProfile(User user, String address, LocalDate dateOfBirth) {
+    public TraineeCreationResult createTraineeProfile(User user, String address, LocalDate dateOfBirth) {
         String password = passwordGenerator.generatePassword(10);
         String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName(),
                 userRepository::existsByUsername);
+
+
 
         String hashPassword = passwordEncoder.encode(password);
         user.setPassword(hashPassword);
@@ -62,7 +64,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee newTrainee = new Trainee(user, address, dateOfBirth);
         traineeRepository.save(newTrainee);
         log.info("Trainee created with username: {}", username);
-        return new TraineeCreationResultDto(newTrainee, password);
+        return new TraineeCreationResult(newTrainee, password);
     }
 
     @Override

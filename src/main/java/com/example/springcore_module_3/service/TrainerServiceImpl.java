@@ -1,7 +1,7 @@
 package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.dto.AuthenticationRequestDto;
-import com.example.springcore_module_3.dto.TrainerCreationResultDto;
+import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
@@ -42,7 +42,7 @@ public class TrainerServiceImpl implements TrainerService {
 
 
     @Override
-    public TrainerCreationResultDto createTrainerProfile(User user, TrainingType trainingType) {
+    public TrainerCreationResult createTrainerProfile(User user, TrainingType trainingType) {
         String password = passwordGenerator.generatePassword(10);
         String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName(),
                 userRepository::existsByUsername);
@@ -53,7 +53,7 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer newTrainer = new Trainer(user, trainingType);
         trainerRepository.save(newTrainer);
         log.info("Trainer created with username: {}", username);
-        return new TrainerCreationResultDto(newTrainer, password);
+        return new TrainerCreationResult(newTrainer, password);
     }
 
     @Override

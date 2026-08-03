@@ -1,7 +1,7 @@
 package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.dto.AuthenticationRequestDto;
-import com.example.springcore_module_3.dto.TraineeCreationResultDto;
+import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.User;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface TraineeService {
 
-    TraineeCreationResultDto createTraineeProfile(@NotNull User user, @NotBlank String address, @Past LocalDate dateOfBirth);
+    TraineeCreationResult createTraineeProfile(@NotNull User user, @NotBlank String address, @Past LocalDate dateOfBirth);
     void updateTraineeProfile(@NotNull AuthenticationRequestDto credentials, @NotNull Trainee trainee);
     void deactivateTraineeProfile(@NotNull AuthenticationRequestDto credentials, @NotNull Long id);
     void activateTraineeProfile(@NotNull AuthenticationRequestDto credentials,@NotNull Long id);

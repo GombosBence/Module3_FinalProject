@@ -1,7 +1,7 @@
 package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.dto.AuthenticationRequestDto;
-import com.example.springcore_module_3.dto.TrainerCreationResultDto;
+import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
@@ -64,7 +64,7 @@ public class TrainerServiceImplTest {
         when(passwordGenerator.generatePassword(10)).thenReturn("QWERTY12345");
 
         User user = new User("Mike", "Wilson", "Mike.Wilson", "QWERTY12345");
-        TrainerCreationResultDto result = trainerService.createTrainerProfile(user, fitness());
+        TrainerCreationResult result = trainerService.createTrainerProfile(user, fitness());
 
         assertEquals("Mike.Wilson", result.trainer().getUser().getUsername());
         assertEquals("FITNESS", result.trainer().getSpecialization().getTrainingTypeName());

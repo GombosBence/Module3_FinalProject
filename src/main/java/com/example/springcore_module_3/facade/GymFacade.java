@@ -28,7 +28,7 @@ public class GymFacade {
 
     // --- Trainee ---
 
-    public TraineeCreationResultDto createTrainee(User user, String address, LocalDate dateOfBirth) {
+    public TraineeCreationResult createTrainee(User user, String address, LocalDate dateOfBirth) {
         return traineeService.createTraineeProfile(user, address, dateOfBirth);
     }
 
@@ -66,7 +66,7 @@ public class GymFacade {
 
     // --- Trainer ---
 
-    public TrainerCreationResultDto createTrainer(User user, TrainingType specialization) {
+    public TrainerCreationResult createTrainer(User user, TrainingType specialization) {
         return trainerService.createTrainerProfile(user, specialization);
     }
 
