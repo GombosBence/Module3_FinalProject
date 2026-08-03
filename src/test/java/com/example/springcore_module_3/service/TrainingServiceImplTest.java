@@ -1,6 +1,6 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dto.AuthenticationRequestDto;
+import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.repository.*;
 import com.example.springcore_module_3.model.Trainee;
@@ -59,7 +59,7 @@ public class TrainingServiceImplTest {
         when(trainerRepository.findById(3L)).thenReturn(Optional.of(trainer));
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
         Training training = assertDoesNotThrow(() -> trainingService.createTraining(credentials, 1L, 3L,
                 "Sample", type, date, duration));
@@ -77,7 +77,7 @@ public class TrainingServiceImplTest {
     @Test
     void createTraining_traineeDoesNotExistTest(){
         when(traineeRepository.findById(1L)).thenReturn(Optional.empty());
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
         assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, 1L, 3L,
                 "Sample", fitness(), LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
@@ -89,7 +89,7 @@ public class TrainingServiceImplTest {
         trainee.setTraineeId(1L);
         when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
         when(trainerRepository.findById(3L)).thenReturn(Optional.empty());
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
         assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, 1L, 3L,
                 "Sample", fitness(), LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
@@ -102,7 +102,7 @@ public class TrainingServiceImplTest {
                 new Training(),
                 new Training()
         ));
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
         List<Training> list = trainingService.selectTraineeTrainings(credentials, "John.Doe", null, null, null, null);
 
@@ -114,7 +114,7 @@ public class TrainingServiceImplTest {
     @Test
     void selectTrainee_AuthenticationFailedTest(){
 
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
         doThrow(AuthenticationFailedException.class).when(authenticationService).authenticate("John.Doe", "rawPw");
 
         assertThrows(AuthenticationFailedException.class,
@@ -129,7 +129,7 @@ public class TrainingServiceImplTest {
                 new Training(),
                 new Training()
         ));
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
         List<Training> list = trainingService.selectTrainerTrainings(credentials, "John.Doe", null, null, null);
 
@@ -141,7 +141,7 @@ public class TrainingServiceImplTest {
     @Test
     void selectTrainer_AuthenticationFailedTest(){
 
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPw");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
         doThrow(AuthenticationFailedException.class).when(authenticationService).authenticate("John.Doe", "rawPw");
 
         assertThrows(AuthenticationFailedException.class,

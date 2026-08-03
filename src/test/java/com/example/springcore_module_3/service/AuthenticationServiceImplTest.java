@@ -44,25 +44,25 @@ public class AuthenticationServiceImplTest {
     void successfulAuthenticationTest(){
         User user = generateUser();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("rawPassword", user.getPassword())).thenReturn(Boolean.TRUE);
+        when(passwordEncoder.matches("password", user.getPassword())).thenReturn(Boolean.TRUE);
 
-        assertDoesNotThrow(() -> authenticationService.authenticate("Test.User", "rawPassword"));
+        assertDoesNotThrow(() -> authenticationService.authenticate("Test.User", "password"));
     }
 
     @Test
     void userNameDoesNotExistAuthenticationTest(){
         when(userRepository.findByUsername("Test.User")).thenReturn(Optional.empty());
 
-        assertThrows(AuthenticationFailedException.class, () -> authenticationService.authenticate("Test.User", "rawPassword"));
+        assertThrows(AuthenticationFailedException.class, () -> authenticationService.authenticate("Test.User", "password"));
     }
 
     @Test
     void passwordsDoNotMatchAuthenticationTest(){
         User user = generateUser();
         when(userRepository.findByUsername("Test.User")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("rawPassword", user.getPassword())).thenReturn(false);
+        when(passwordEncoder.matches("password", user.getPassword())).thenReturn(false);
 
-        assertThrows(AuthenticationFailedException.class, () -> authenticationService.authenticate("Test.User", "rawPassword"));
+        assertThrows(AuthenticationFailedException.class, () -> authenticationService.authenticate("Test.User", "password"));
     }
 
     @Test
@@ -84,20 +84,20 @@ public class AuthenticationServiceImplTest {
     void authenticateAndAuthorize_succeeds_whenActingOnOwnProfile() {
         User user = new User("John", "Doe", "John.Doe", "hashedPassword");
         when(userRepository.findByUsername("John.Doe")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("rawPassword", "hashedPassword")).thenReturn(true);
+        when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
 
         assertDoesNotThrow(() ->
-                authenticationService.authenticateAndAuthorize("John.Doe", "rawPassword", "John.Doe"));
+                authenticationService.authenticateAndAuthorize("John.Doe", "password", "John.Doe"));
     }
 
     @Test
     void authenticateAndAuthorize_throwsUnauthorized_whenTargetUsernameDiffers() {
         User user = new User("John", "Doe", "John.Doe", "hashedPassword");
         when(userRepository.findByUsername("John.Doe")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("rawPassword", "hashedPassword")).thenReturn(true);
+        when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
 
         assertThrows(UnAuthorizedAccessException.class, () ->
-                authenticationService.authenticateAndAuthorize("John.Doe", "rawPassword", "Someone.Else"));
+                authenticationService.authenticateAndAuthorize("John.Doe", "password", "Someone.Else"));
     }
 
     @Test

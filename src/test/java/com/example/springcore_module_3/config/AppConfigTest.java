@@ -15,9 +15,9 @@ class AppConfigTest {
     void passwordEncoder_returnsWorkingBCryptEncoder() {
         BCryptPasswordEncoder encoder = appConfig.passwordEncoder();
 
-        String hash = encoder.encode("rawPassword");
+        String hash = encoder.encode("password");
 
-        assertNotEquals("rawPassword", hash);
-        assertTrue(encoder.matches("rawPassword", hash));
+        assertNotEquals("password", hash);
+        assertTrue(encoder.matches("password", hash));
     }
 }

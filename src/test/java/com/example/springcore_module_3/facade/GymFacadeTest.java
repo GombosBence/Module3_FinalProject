@@ -1,6 +1,6 @@
 package com.example.springcore_module_3.facade;
 
-import com.example.springcore_module_3.dto.AuthenticationRequestDto;
+import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.model.*;
@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,21 +47,21 @@ class GymFacadeTest {
         TraineeCreationResult expected = new TraineeCreationResult(
                 new Trainee(user, "123 Main St", dob), "rawPassword123");
 
-        when(traineeService.createTraineeProfile(user, "123 Main St", dob)).thenReturn(expected);
+        when(traineeService.createTraineeProfile(any(User.class), eq("123 Main St"), eq(dob))).thenReturn(expected);
 
-        TraineeCreationResult result = facade.createTrainee(user, "123 Main St", dob);
+        TraineeCreationResult result = facade.createTrainee("John", "Doe", "123 Main St", dob);
 
         assertEquals(expected, result);
-        verify(traineeService).createTraineeProfile(user, "123 Main St", dob);
+        verify(traineeService).createTraineeProfile(any(User.class), eq("123 Main St"), eq(dob));
     }
 
     @Test
     void deactivateTrainee_delegatesToTraineeService() {
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
-        facade.deactivateTrainee(credentials, 5L);
+        facade.deactivateTrainee(credentials, "John.Doe");
 
-        verify(traineeService).deactivateTraineeProfile(credentials, 5L);
+        verify(traineeService).deactivateTraineeProfile(credentials, "John.Doe");
     }
 
     @Test
@@ -79,7 +81,7 @@ class GymFacadeTest {
 
     @Test
     void getTraineeTrainings_delegatesToTrainingService_andReturnsList() {
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         List<Training> expected = List.of(new Training(), new Training());
         LocalDate fromDate = LocalDate.of(2026, 1, 1);
         LocalDate toDate = LocalDate.of(2026, 12, 31);
@@ -95,7 +97,7 @@ class GymFacadeTest {
 
     @Test
     void createTraining_delegatesToTrainingService_withCorrectArgsAndReturnValue() {
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         Training expected = new Training();
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
@@ -112,11 +114,11 @@ class GymFacadeTest {
 
     @Test
     void updateTraineeTrainers_delegatesToTraineeService() {
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
-        List<Long> trainerIds = List.of(1L, 2L);
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
+        List<String> trainerUsernames = List.of("Mike.Mentzer", "Jane.Roe");
 
-        facade.updateTraineeTrainers(credentials, "John.Doe", trainerIds);
+        facade.updateTraineeTrainers(credentials, "John.Doe", trainerUsernames);
 
-        verify(traineeService).updateTraineeTrainers(credentials, "John.Doe", trainerIds);
+        verify(traineeService).updateTraineeTrainers(credentials, "John.Doe", trainerUsernames );
     }
 }

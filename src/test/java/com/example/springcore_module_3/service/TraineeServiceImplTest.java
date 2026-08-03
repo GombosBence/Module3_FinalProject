@@ -1,6 +1,6 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dto.AuthenticationRequestDto;
+import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
@@ -98,7 +98,7 @@ public class TraineeServiceImplTest {
         User user = new User("John", "Doe", "John.Doe", "ABCDE12345");
         Trainee updated = new Trainee(user, "NEW ADDRESS", LocalDate.of(1989, 4,11));
         Trainee old = new Trainee(user, "Old Address", LocalDate.of(1989, 4, 11));
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(old));
 
@@ -112,7 +112,7 @@ public class TraineeServiceImplTest {
 
         User user = new User("John", "Doe", "John.Doe", "hashedPw");
         Trainee incoming = new Trainee(user, "New Address", LocalDate.of(1989, 4, 11));
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "wrongPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "wrongPassword");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(incoming));
         doThrow(new AuthenticationFailedException("Invalid username or password"))
@@ -128,11 +128,11 @@ public class TraineeServiceImplTest {
     void updateTraineeProfile_throwsUnauthorized_whenActingOnDifferentProfile() {
         User targetUser = new User("John", "Doe", "John.Doe", "hashedPw");
         Trainee targetTrainee = new Trainee(targetUser, "New Address", LocalDate.of(1989, 4, 11));
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("Eve.Evil", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("Eve.Evil", "password");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(targetTrainee));
         doThrow(new UnAuthorizedAccessException("You are not authorized to perform this operation"))
-                .when(authenticationService).authenticateAndAuthorize("Eve.Evil", "rawPassword", "John.Doe");
+                .when(authenticationService).authenticateAndAuthorize("Eve.Evil", "password", "John.Doe");
 
         assertThrows(UnAuthorizedAccessException.class,
                 () -> traineeService.updateTraineeProfile(credentials, targetTrainee));
@@ -146,7 +146,7 @@ public class TraineeServiceImplTest {
         Trainee original = new Trainee(user, "Old Address", LocalDate.of(1989, 4, 11));
         Trainee incoming = new Trainee(user, "New Address", LocalDate.of(1989, 4, 11));
 
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(original));
 
         traineeService.updateTraineeProfile(credentials, incoming);
@@ -161,7 +161,7 @@ public class TraineeServiceImplTest {
         Trainee original = new Trainee(user, "Original Address", LocalDate.of(1989, 4, 11));
         Trainee incoming = new Trainee(user, null, null);
 
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(original));
 
         traineeService.updateTraineeProfile(credentials, incoming);
@@ -174,7 +174,7 @@ public class TraineeServiceImplTest {
     void deleteTraineeProfileSuccessTest() {
         User user = new User("John", "Doe", "John.Doe", "hashedPw");
         Trainee trainee = new  Trainee(user, "Address", LocalDate.of(1989, 4, 11));
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
 
@@ -186,7 +186,7 @@ public class TraineeServiceImplTest {
     @Test
     void deleteTraineeProfileNotFoundTest() {
 
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John", "password");
         when(traineeRepository.findByUserUsername(any())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> traineeService.deleteTraineeProfile(credentials, "John.Doe"));
@@ -196,22 +196,22 @@ public class TraineeServiceImplTest {
 
     @Test
     void selectTraineeProfileByIdSuccessTest() {
-        User user =  new User("John", "Doe", "John.Doe", "rawPassword");
+        User user =  new User("John", "Doe", "John.Doe", "password");
         Trainee trainee = new  Trainee(user, "Address", LocalDate.of(1989, 4, 11));
         trainee.setTraineeId(1L);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
 
         assertDoesNotThrow(() -> traineeService.selectTraineeProfile(credentials, 1L));
-        verify(authenticationService).authenticate("John.Doe", "rawPassword");
+        verify(authenticationService).authenticate("John.Doe", "password");
     }
 
     @Test
     void selectTraineeProfileByIdFailureTest() {
         Trainee trainee = new  Trainee();
         trainee.setTraineeId(1L);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         assertThrows(NoSuchElementException.class, () -> traineeService.selectTraineeProfile(credentials, 1L));
     }
@@ -220,19 +220,19 @@ public class TraineeServiceImplTest {
     void selectTraineeProfileByUsernameSuccessTest() {
         Trainee trainee = new  Trainee();
         trainee.setTraineeId(1L);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
 
         assertDoesNotThrow(() -> traineeService.selectTraineeProfileByUsername(credentials, "John.Doe"));
-        verify(authenticationService).authenticate("John.Doe", "rawPassword");
+        verify(authenticationService).authenticate("John.Doe", "password");
     }
 
     @Test
     void selectTraineeProfileByUsernameFailureTest() {
         Trainee trainee = new  Trainee();
         trainee.setTraineeId(1L);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.empty());
 
@@ -241,15 +241,15 @@ public class TraineeServiceImplTest {
 
     @Test
     void deactivateTraineeProfile_setsInactive_whenTraineeExists() {
-        User user =  new User("John", "Doe", "John.Doe", "rawPassword");
+        User user =  new User("John", "Doe", "John.Doe", "password");
         Trainee trainee = new  Trainee(user, "Address", LocalDate.of(1989, 4, 11));
         trainee.setTraineeId(1L);
         trainee.getUser().setActive(true);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
+        when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
 
-        assertDoesNotThrow(() -> traineeService.deactivateTraineeProfile(credentials, 1L));
+        assertDoesNotThrow(() -> traineeService.deactivateTraineeProfile(credentials, "John.Doe"));
 
         assertFalse(trainee.getUser().isActive());
         verify(traineeRepository).save(trainee);
@@ -257,40 +257,40 @@ public class TraineeServiceImplTest {
 
     @Test
     void deactivateTraineeProfile_throws_whenTraineeDoesNotExist() {
-        when(traineeRepository.findById(999L)).thenReturn(Optional.empty());
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John", "rawPassword");
+        when(traineeRepository.findByUserUsername("wrong")).thenReturn(Optional.empty());
+        AuthenticationRequest credentials = new AuthenticationRequest("John", "password");
 
         assertThrows(NoSuchElementException.class,
-                () -> traineeService.deactivateTraineeProfile(credentials, 999L));
+                () -> traineeService.deactivateTraineeProfile(credentials, "wrong"));
 
         verify(traineeRepository, never()).save(any());
     }
 
     @Test
     void deactivateThrows_whenAlreadyDeactivatedTrainee() {
-        User user =  new User("John", "Doe", "John.Doe", "rawPassword");
+        User user =  new User("John", "Doe", "John.Doe", "password");
         Trainee trainee = new  Trainee(user, "Address", LocalDate.of(1989, 4, 11));
         trainee.setTraineeId(1L);
         trainee.getUser().setActive(false);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
+        when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
 
-        assertThrows(InvalidStateTransitionException.class, () -> traineeService.deactivateTraineeProfile(credentials, 1L));
+        assertThrows(InvalidStateTransitionException.class, () -> traineeService.deactivateTraineeProfile(credentials, "John.Doe"));
         verify(traineeRepository, never()).save(any());
     }
 
     @Test
     void activateTraineeProfile_setsActive_whenTraineeExists() {
-        User user =  new User("John", "Doe", "John.Doe", "rawPassword");
+        User user =  new User("John", "Doe", "John.Doe", "password");
         Trainee trainee = new  Trainee(user, "Address", LocalDate.of(1989, 4, 11));
         trainee.setTraineeId(1L);
         trainee.getUser().setActive(false);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
+        when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
 
-        assertDoesNotThrow(() -> traineeService.activateTraineeProfile(credentials, 1L));
+        assertDoesNotThrow(() -> traineeService.activateTraineeProfile(credentials, "John.Doe"));
 
         assertTrue(trainee.getUser().isActive());
         verify(traineeRepository).save(trainee);
@@ -298,26 +298,26 @@ public class TraineeServiceImplTest {
 
     @Test
     void activateTraineeProfile_throws_whenTraineeDoesNotExist() {
-        when(traineeRepository.findById(999L)).thenReturn(Optional.empty());
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John", "rawPassword");
+        when(traineeRepository.findByUserUsername("wrong")).thenReturn(Optional.empty());
+        AuthenticationRequest credentials = new AuthenticationRequest("John", "password");
 
         assertThrows(NoSuchElementException.class,
-                () -> traineeService.activateTraineeProfile(credentials, 999L));
+                () -> traineeService.activateTraineeProfile(credentials, "wrong"));
 
         verify(traineeRepository, never()).save(any());
     }
 
     @Test
     void activateThrows_whenAlreadyActivatedTrainee() {
-        User user =  new User("John", "Doe", "John.Doe", "rawPassword");
+        User user =  new User("John", "Doe", "John.Doe", "password");
         Trainee trainee = new  Trainee(user, "Address", LocalDate.of(1989, 4, 11));
         trainee.setTraineeId(1L);
         trainee.getUser().setActive(true);
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
+        when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
 
-        assertThrows(InvalidStateTransitionException.class, () -> traineeService.activateTraineeProfile(credentials, 1L));
+        assertThrows(InvalidStateTransitionException.class, () -> traineeService.activateTraineeProfile(credentials, "John.Doe"));
         verify(traineeRepository, never()).save(any());
     }
 
@@ -326,12 +326,12 @@ public class TraineeServiceImplTest {
         Trainee trainee = new Trainee(new User("John", "Doe", "John.Doe", "hashedPw"), "Addr", LocalDate.of(1989, 4, 11));
         Trainer trainer1 = new Trainer(new User("Mike", "Wilson", "Mike.Wilson", "hashedPw"), fitness());
         Trainer trainer2 = new Trainer(new User("Sara", "Connor", "Sara.Connor", "hashedPw"), fitness());
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(trainer1, trainer2));
+        when(trainerRepository.findAllByUserUsernameIn(List.of("user.name1", "user.name2"))).thenReturn(List.of(trainer1, trainer2));
 
-        assertDoesNotThrow(() -> traineeService.updateTraineeTrainers(credentials, "John.Doe", List.of(1L, 2L)));
+        assertDoesNotThrow(() -> traineeService.updateTraineeTrainers(credentials, "John.Doe", List.of("user.name1", "user.name2")));
 
         assertEquals(2, trainee.getTrainers().size());
         verify(traineeRepository).save(trainee);
@@ -341,20 +341,20 @@ public class TraineeServiceImplTest {
     void updateTraineeTrainers_throws_whenSomeTrainerIdsDoNotExist() {
         Trainee trainee = new Trainee(new User("John", "Doe", "John.Doe", "hashedPw"), "Addr", LocalDate.of(1989, 4, 11));
         Trainer trainer1 = new Trainer(new User("Mike", "Wilson", "Mike.Wilson", "hashedPw"), fitness());
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
 
         when(traineeRepository.findByUserUsername("John.Doe")).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findAllById(List.of(1L, 999L))).thenReturn(List.of(trainer1));
+        when(trainerRepository.findAllByUserUsernameIn(List.of("Mike.Wilson", "wrong"))).thenReturn(List.of(trainer1));
 
         assertThrows(NoSuchElementException.class,
-                () -> traineeService.updateTraineeTrainers(credentials, "John.Doe", List.of(1L, 999L)));
+                () -> traineeService.updateTraineeTrainers(credentials, "John.Doe", List.of("Mike.Wilson", "wrong")));
 
         verify(traineeRepository, never()).save(any());
     }
 
     @Test
     void selectUnassignedTrainers_returnsListFromRepository() {
-        AuthenticationRequestDto credentials = new AuthenticationRequestDto("John.Doe", "rawPassword");
+        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         List<Trainer> expected = List.of(new Trainer(new User("Sara", "Connor", "Sara.Connor", "hashedPw"), fitness()));
 
         when(trainerRepository.findUnassignedTrainers("John.Doe")).thenReturn(expected);
@@ -362,7 +362,7 @@ public class TraineeServiceImplTest {
         List<Trainer> result = traineeService.selectUnassignedTrainers(credentials, "John.Doe");
 
         assertEquals(1, result.size());
-        verify(authenticationService).authenticate("John.Doe", "rawPassword");
+        verify(authenticationService).authenticate("John.Doe", "password");
     }
 
 }
