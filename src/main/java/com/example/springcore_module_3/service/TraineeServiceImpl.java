@@ -75,15 +75,8 @@ public class TraineeServiceImpl implements TraineeService {
 
         authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainee.getUser().getUsername());
 
-        if(!original.getUser().getFirstName().equals(trainee.getUser().getFirstName())
-            || !original.getUser().getLastName().equals(trainee.getUser().getLastName())) {
-            log.info("Trainee last/first name changed -> creating new username");
-            String newUsername = usernameGenerator.generateUsername(trainee.getUser().getFirstName(), trainee.getUser().getLastName(),
-                    userRepository::existsByUsername);
-            original.getUser().setFirstName(trainee.getUser().getFirstName());
-            original.getUser().setLastName(trainee.getUser().getLastName());
-            original.getUser().setUsername(newUsername);
-        }
+        if(trainee.getUser().getFirstName() != null) original.getUser().setFirstName(trainee.getUser().getFirstName());
+        if(trainee.getUser().getLastName() != null) original.getUser().setLastName(trainee.getUser().getLastName());
         if(trainee.getAddress() != null) original.setAddress(trainee.getAddress());
         if(trainee.getDateOfBirth() != null) original.setDateOfBirth(trainee.getDateOfBirth());
 

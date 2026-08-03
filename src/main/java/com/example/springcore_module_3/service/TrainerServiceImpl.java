@@ -67,16 +67,8 @@ public class TrainerServiceImpl implements TrainerService {
 
         authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainer.getUser().getUsername());
 
-        if(!trainer.getUser().getFirstName().equals(original.getUser().getFirstName())
-            || !trainer.getUser().getLastName().equals(original.getUser().getLastName()))
-        {
-            log.info("Trainer last/first name changed -> creating new username");
-            String newUsername = usernameGenerator.generateUsername(trainer.getUser().getFirstName(), trainer.getUser().getLastName(), userRepository::existsByUsername);
-            original.getUser().setFirstName(trainer.getUser().getFirstName());
-            original.getUser().setLastName(trainer.getUser().getLastName());
-            original.getUser().setUsername(newUsername);
-            log.info("Trainer username regenerated: {} -> {}", trainer.getUser().getUsername(), newUsername);
-        }
+        if(trainer.getUser().getFirstName() != null) original.getUser().setFirstName(trainer.getUser().getFirstName());
+        if(trainer.getUser().getLastName() != null) original.getUser().setLastName(trainer.getUser().getLastName());
         if(trainer.getSpecialization() != null) original.setSpecialization(trainer.getSpecialization());
 
         trainerRepository.save(original);
