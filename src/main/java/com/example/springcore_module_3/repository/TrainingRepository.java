@@ -18,18 +18,18 @@ public interface TrainingRepository extends JpaRepository<Training, Long> {
     void deleteAllByTraineeUserUsername(String username);
 
     @Query("""
-        SElECT t FROM Training t
+        SELECT t FROM Training t
         WHERE t.trainee.user.username = :username
         AND (:fromDate IS NULL OR t.trainingDate >= :fromDate)
         AND (:toDate IS NULL OR t.trainingDate <= :toDate)
         AND (:trainerName IS NULL OR t.trainer.user.username = :trainerName)
-        AND (:trainingType IS NULL OR t.trainingType = :trainingType)
-""")
+        AND (:trainingType IS NULL OR t.trainingType.trainingTypeName = :trainingType)
+    """)
     List<Training> findTraineeTrainings(@Param("username") String username,
                                         @Param("fromDate") LocalDate fromDate,
                                         @Param("toDate") LocalDate toDate,
                                         @Param("trainerName") String trainerName,
-                                        @Param("trainingType")TrainingType trainingType);
+                                        @Param("trainingType") String trainingType);
 
 
     @Query("""

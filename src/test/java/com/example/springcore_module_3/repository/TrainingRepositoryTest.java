@@ -92,7 +92,7 @@ public class TrainingRepositoryTest {
                 LocalDate.of(2026, 10, 1),
                 LocalDate.of(2026, 11, 11),
                 null,
-                trainingType);
+                "FITNESS");
 
         assertFalse(result.isEmpty());
         assertEquals(2, result.size());

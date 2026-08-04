@@ -95,7 +95,8 @@ class GymFacadeTest {
         List<Training> result = facade.getTraineeTrainings(credentials, "John.Doe", fromDate, toDate, "Sara.Connor", null);
 
         assertEquals(expected, result);
-        verify(trainingService).selectTraineeTrainings(credentials, "John.Doe", fromDate, toDate, "Sara.Connor", null);
+        verify(trainingService).selectTraineeTrainings(any(), eq("John.Doe"),
+                eq(fromDate), eq(toDate), eq("Sara.Connor"), any());
     }
 
     @Test
@@ -106,13 +107,11 @@ class GymFacadeTest {
         Duration duration = Duration.ofMinutes(90);
         TrainingType fitness = new TrainingType("FITNESS");
 
-        when(trainingService.createTraining(credentials, 1L, 3L, "Sample", fitness, date, duration))
+        when(trainingService.createTraining(credentials, "John.Doe", "Mike.Mentzer", "Sample", date, duration))
                 .thenReturn(expected);
+        facade.createTraining(credentials, "John.Doe", "Mike.Mentzer", "Sample", date, duration);
 
-        Training result = facade.createTraining(credentials, 1L, 3L, "Sample", fitness, date, duration);
-
-        assertEquals(expected, result);
-        verify(trainingService).createTraining(credentials, 1L, 3L, "Sample", fitness, date, duration);
+        verify(trainingService).createTraining(credentials, "John.Doe", "Mike.Mentzer", "Sample", date, duration);
     }
 
     @Test

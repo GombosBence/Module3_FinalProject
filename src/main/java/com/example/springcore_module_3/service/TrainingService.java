@@ -13,10 +13,15 @@ import java.util.List;
 
 public interface TrainingService {
 
-    Training createTraining(@NotNull AuthenticationRequest credentials, @NotNull Long traineeId, @NotNull Long trainerId, @NotBlank String trainingName,
-                            @NotNull TrainingType trainingType, @Past LocalDate trainingDate, @NotNull Duration trainingDuration);
+    Training createTraining(@NotNull AuthenticationRequest credentials, @NotNull String traineeUsername,
+                            @NotNull String trainerUsername, @NotBlank String trainingName,
+                            @Past LocalDate trainingDate,
+                            @NotNull Duration trainingDuration);
 
-    List<Training> selectTraineeTrainings(@NotNull AuthenticationRequest credentials, @NotNull String username, LocalDate fromDate, LocalDate toDate, String trainerName, TrainingType trainingType);
+    // TrainingService interface
+    List<Training> selectTraineeTrainings(AuthenticationRequest credentials, String username,
+                                          LocalDate fromDate, LocalDate toDate,
+                                          String trainerName, String trainingType);
 
     List<Training> selectTrainerTrainings(@NotNull AuthenticationRequest credentials, @NotNull String username, LocalDate fromDate, LocalDate toDate, String traineeName);
 }

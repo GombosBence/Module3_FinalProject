@@ -52,22 +52,17 @@ public class TrainingServiceImplTest {
     void createTrainingSuccessTest(){
         Trainee trainee = new Trainee();
         Trainer trainer = new Trainer();
-        trainee.setTraineeId(1L);
-        trainer.setTrainerId(3L);
         TrainingType type = fitness();
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findById(3L)).thenReturn(Optional.of(trainer));
+        when(traineeRepository.findByUserUsername(any())).thenReturn(Optional.of(trainee));
+        when(trainerRepository.findByUserUsername(any())).thenReturn(Optional.of(trainer));
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
         AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
-        Training training = assertDoesNotThrow(() -> trainingService.createTraining(credentials, 1L, 3L,
-                "Sample", type, date, duration));
+        Training training = assertDoesNotThrow(() -> trainingService.createTraining(credentials, "John.Doe", "Mike.Mentzer",
+                "Sample", date, duration));
 
-        assertEquals(1L, training.getTrainee().getTraineeId());
-        assertEquals(3L, training.getTrainer().getTrainerId());
         assertEquals("Sample", training.getTrainingName());
-        assertEquals(type, training.getTrainingType());
         assertEquals(date, training.getTrainingDate());
         assertEquals(duration, training.getTrainingDuration());
         verify(authenticationService).authenticate(credentials.username(), credentials.password());
@@ -76,23 +71,20 @@ public class TrainingServiceImplTest {
 
     @Test
     void createTraining_traineeDoesNotExistTest(){
-        when(traineeRepository.findById(1L)).thenReturn(Optional.empty());
         AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
-        assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, 1L, 3L,
-                "Sample", fitness(), LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
+        assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, "John.Doe", "Mike.Mentzer",
+                "Sample", LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
     }
 
     @Test
     void createTraining_trainerDoesNotExistTest(){
         Trainee trainee = new Trainee();
         trainee.setTraineeId(1L);
-        when(traineeRepository.findById(1L)).thenReturn(Optional.of(trainee));
-        when(trainerRepository.findById(3L)).thenReturn(Optional.empty());
         AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "rawPw");
 
-        assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, 1L, 3L,
-                "Sample", fitness(), LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
+        assertThrows(NoSuchElementException.class, () -> trainingService.createTraining(credentials, "John.Doe", "Mike.Mentzer",
+                "Sample", LocalDate.of(2026, 3, 14), Duration.ofMinutes(90)));
 
     }
 

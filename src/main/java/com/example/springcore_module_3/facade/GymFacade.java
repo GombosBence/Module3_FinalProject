@@ -100,16 +100,16 @@ public class GymFacade {
 
     // --- Training ---
 
-    public Training createTraining(AuthenticationRequest credentials, Long traineeId, Long trainerId,
-                                   String trainingName, TrainingType trainingType, LocalDate trainingDate,
+    public void createTraining(AuthenticationRequest credentials, String traineeUsername, String trainerUsername,
+                                   String trainingName, LocalDate trainingDate,
                                    Duration trainingDuration) {
-        return trainingService.createTraining(credentials, traineeId, trainerId, trainingName,
-                trainingType, trainingDate, trainingDuration);
+        trainingService.createTraining(credentials, traineeUsername, trainerUsername, trainingName,
+                 trainingDate, trainingDuration);
     }
 
     public List<Training> getTraineeTrainings(AuthenticationRequest credentials, String username,
                                               LocalDate fromDate, LocalDate toDate, String trainerName,
-                                              TrainingType trainingType) {
+                                              String trainingType) {
         return trainingService.selectTraineeTrainings(credentials, username, fromDate, toDate, trainerName, trainingType);
     }
 

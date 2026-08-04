@@ -37,28 +37,31 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Override
     @Transactional
-    public Training createTraining(@NotNull AuthenticationRequest credentials, Long traineeId, Long trainerId, String trainingName, TrainingType trainingType, LocalDate trainingDate, Duration trainingDuration) {
+    public Training createTraining(@NotNull AuthenticationRequest credentials,
+                                   @NotNull String traineeUsername, @NotNull String trainerUsername,
+                                   String trainingName, LocalDate trainingDate,
+                                   Duration trainingDuration) {
 
         authenticationService.authenticate(credentials.username(), credentials.password());
 
-        Trainee trainee = traineeRepository.findById(traineeId).orElseThrow(() -> {
-            log.warn("Trainee with id {} not found", traineeId);
-            return new NoSuchElementException("Trainee with id " + traineeId + " not found");
+        Trainee trainee = traineeRepository.findByUserUsername(traineeUsername).orElseThrow(() -> {
+            log.warn("Trainee with username {} not found", traineeUsername);
+            return new NoSuchElementException("Trainee with username " + traineeUsername + " not found");
         });
 
-        Trainer trainer = trainerRepository.findById(trainerId).orElseThrow(() -> {
-            log.warn("Trainer with id {} not found", trainerId);
-            return new NoSuchElementException("Trainer with id " + trainerId + " not found");
+        Trainer trainer = trainerRepository.findByUserUsername(trainerUsername).orElseThrow(() -> {
+            log.warn("Trainer with username {} not found", trainerUsername);
+            return new NoSuchElementException("Trainer with username " + trainerUsername + " not found");
         });
 
-        Training newTraining  = new Training(trainee, trainer, trainingName, trainingType, trainingDate, trainingDuration);
+        Training newTraining  = new Training(trainee, trainer, trainingName, trainer.getSpecialization(), trainingDate, trainingDuration);
         trainingRepository.save(newTraining);
         log.info("Training has been created with name={}", trainingName);
         return newTraining;
     }
 
     @Override
-    public List<Training> selectTraineeTrainings(@NotNull AuthenticationRequest credentials, String username, LocalDate fromDate, LocalDate toDate, String trainerName, TrainingType trainingType) {
+    public List<Training> selectTraineeTrainings(@NotNull AuthenticationRequest credentials, String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
         authenticationService.authenticate(credentials.username(), credentials.password());
         return trainingRepository.findTraineeTrainings(username, fromDate, toDate, trainerName, trainingType);
     }
