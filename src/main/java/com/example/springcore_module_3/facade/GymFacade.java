@@ -72,20 +72,22 @@ public class GymFacade {
 
     // --- Trainer ---
 
-    public TrainerCreationResult createTrainer(User user, TrainingType specialization) {
+    public TrainerCreationResult createTrainer(String firstName, String lastName, TrainingType specialization) {
+
+        User user = new User(firstName, lastName, null, null);
         return trainerService.createTrainerProfile(user, specialization);
     }
 
-    public void updateTrainer(AuthenticationRequest credentials, Trainer trainer) {
-        trainerService.updateTrainerProfile(credentials, trainer);
+    public Trainer updateTrainer(AuthenticationRequest credentials, Trainer trainer) {
+        return trainerService.updateTrainerProfile(credentials, trainer);
     }
 
-    public void activateTrainer(AuthenticationRequest credentials, Long id) {
-        trainerService.activateTrainerProfile(credentials, id);
+    public void activateTrainer(AuthenticationRequest credentials, String username) {
+        trainerService.activateTrainerProfile(credentials, username);
     }
 
-    public void deactivateTrainer(AuthenticationRequest credentials, Long id) {
-        trainerService.deactivateTrainerProfile(credentials, id);
+    public void deactivateTrainer(AuthenticationRequest credentials, String username) {
+        trainerService.deactivateTrainerProfile(credentials, username);
     }
 
     public Trainer getTrainer(AuthenticationRequest credentials, Long id) {

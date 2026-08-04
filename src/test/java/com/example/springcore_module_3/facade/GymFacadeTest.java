@@ -74,12 +74,12 @@ class GymFacadeTest {
         TrainerCreationResult expected = new TrainerCreationResult(
                 new Trainer(user, fitness), "rawPassword456");
 
-        when(trainerService.createTrainerProfile(user, fitness)).thenReturn(expected);
+        when(trainerService.createTrainerProfile(any(User.class), any(TrainingType.class))).thenReturn(expected);
 
-        TrainerCreationResult result = facade.createTrainer(user, fitness);
+        TrainerCreationResult result = facade.createTrainer(user.getFirstName(), user.getLastName(), fitness);
 
         assertEquals(expected, result);
-        verify(trainerService).createTrainerProfile(user, fitness);
+        verify(trainerService).createTrainerProfile(any(User.class), any(TrainingType.class));
     }
 
     @Test

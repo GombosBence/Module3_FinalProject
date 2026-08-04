@@ -58,7 +58,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void updateTrainerProfile(@NotNull AuthenticationRequest credentials, Trainer trainer) {
+    public Trainer updateTrainerProfile(@NotNull AuthenticationRequest credentials, Trainer trainer) {
 
         Trainer original = trainerRepository.findByUserUsername(trainer.getUser().getUsername()).orElseThrow(() -> {
             log.warn("Trainer not found with username: {}", trainer.getUser().getUsername());
@@ -70,17 +70,19 @@ public class TrainerServiceImpl implements TrainerService {
         if(trainer.getUser().getFirstName() != null) original.getUser().setFirstName(trainer.getUser().getFirstName());
         if(trainer.getUser().getLastName() != null) original.getUser().setLastName(trainer.getUser().getLastName());
         if(trainer.getSpecialization() != null) original.setSpecialization(trainer.getSpecialization());
+        original.getUser().setActive(trainer.getUser().isActive());
 
         trainerRepository.save(original);
+        return original;
     }
 
     @Override
     @Transactional
-    public void deactivateTrainerProfile(@NotNull AuthenticationRequest credentials, Long id) {
+    public void deactivateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull String username) {
 
-        Trainer trainer = trainerRepository.findById(id).orElseThrow(() -> {
-            log.warn("Trainer not found with id: {}", id);
-            return new NoSuchElementException("Trainer not found with id: " + id);
+        Trainer trainer = trainerRepository.findByUserUsername(username).orElseThrow(() -> {
+            log.warn("Trainer not found with username : {}", username);
+            return new NoSuchElementException("Trainer not found with username: " + username);
         });
 
         authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainer.getUser().getUsername());
@@ -97,11 +99,11 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void activateTrainerProfile(@NotNull AuthenticationRequest credentials, Long id) {
+    public void activateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull String username) {
 
-        Trainer trainer = trainerRepository.findById(id).orElseThrow(() -> {
-            log.warn("Trainer not found with id : {}", id);
-            return new NoSuchElementException("Trainer not found with id: " + id);
+        Trainer trainer = trainerRepository.findByUserUsername(username).orElseThrow(() -> {
+            log.warn("Trainer not found with id : {}", username);
+            return new NoSuchElementException("Trainer not found with id: " + username);
         });
 
         authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainer.getUser().getUsername());

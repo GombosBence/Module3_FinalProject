@@ -11,9 +11,9 @@ import jakarta.validation.constraints.NotNull;
 public interface TrainerService {
 
     TrainerCreationResult createTrainerProfile(@NotNull User user, @NotNull TrainingType trainingType);
-    void updateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull Trainer trainer);
-    void deactivateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull Long id);
-    void activateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull Long id);
+    Trainer updateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull Trainer trainer);
+    void deactivateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull String username);
+    void activateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull String username);
     Trainer selectTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull Long id);
     Trainer selectTrainerProfileByUsername(@NotNull AuthenticationRequest credentials, @NotBlank String username);
 }

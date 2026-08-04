@@ -1,5 +1,6 @@
 package com.example.springcore_module_3.mapper;
 
+import com.example.springcore_module_3.dto.TraineeProfileDto;
 import com.example.springcore_module_3.dto.TrainerProfileDto;
 import com.example.springcore_module_3.dto.request.TraineeUpdateRequest;
 import com.example.springcore_module_3.dto.response.TraineeGetProfileResponse;
@@ -49,6 +50,14 @@ public class TraineeMapper {
                 trainee.getAddress(),
                 trainee.getUser().isActive(),
                 trainers
+        );
+    }
+
+    public static TraineeProfileDto toProfileDto(Trainee trainee) {
+        return new TraineeProfileDto(
+                trainee.getUser().getUsername(),
+                trainee.getUser().getFirstName(),
+                trainee.getUser().getLastName()
         );
     }
 

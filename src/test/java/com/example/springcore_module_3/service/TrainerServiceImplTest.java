@@ -164,9 +164,9 @@ public class TrainerServiceImplTest {
         trainer.getUser().setActive(true);
         AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
-        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
-        assertDoesNotThrow(() -> trainerService.deactivateTrainerProfile(credentials, 1L));
+        assertDoesNotThrow(() -> trainerService.deactivateTrainerProfile(credentials, user.getUsername()));
 
         assertFalse(trainer.getUser().isActive());
         verify(trainerRepository).save(trainer);
@@ -175,10 +175,10 @@ public class TrainerServiceImplTest {
     @Test
     void deactivateTrainerProfile_throws_whenTrainerDoesNotExist() {
         AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
-        when(trainerRepository.findById(999L)).thenReturn(Optional.empty());
+        when(trainerRepository.findByUserUsername(credentials.username())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,
-                () -> trainerService.deactivateTrainerProfile(credentials, 999L));
+                () -> trainerService.deactivateTrainerProfile(credentials, credentials.username()));
         verify(trainerRepository, never()).save(any());
     }
 
@@ -190,10 +190,10 @@ public class TrainerServiceImplTest {
         trainer.getUser().setActive(false);
         AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
-        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
         assertThrows(InvalidStateTransitionException.class,
-                () -> trainerService.deactivateTrainerProfile(credentials, 1L));
+                () -> trainerService.deactivateTrainerProfile(credentials, user.getUsername()));
         verify(trainerRepository, never()).save(any());
     }
 
@@ -205,9 +205,9 @@ public class TrainerServiceImplTest {
         trainer.getUser().setActive(false);
         AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
-        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
-        assertDoesNotThrow(() -> trainerService.activateTrainerProfile(credentials, 1L));
+        assertDoesNotThrow(() -> trainerService.activateTrainerProfile(credentials, user.getUsername()));
 
         assertTrue(trainer.getUser().isActive());
         verify(trainerRepository).save(trainer);
@@ -221,10 +221,10 @@ public class TrainerServiceImplTest {
         trainer.getUser().setActive(true);
         AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
-        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
         assertThrows(InvalidStateTransitionException.class,
-                () -> trainerService.activateTrainerProfile(credentials, 1L));
+                () -> trainerService.activateTrainerProfile(credentials, user.getUsername()));
         verify(trainerRepository, never()).save(any());
     }
 }
