@@ -14,10 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceImplTest {
+public class AuthenticationServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -106,6 +107,42 @@ public class AuthenticationServiceImplTest {
 
         assertThrows(AuthenticationFailedException.class, () ->
                 authenticationService.authenticateAndAuthorize("John.Doe", "wrongPassword", "SomeoneElse.Entirely"));
+    }
+
+    @Test
+    void changePassword_successfulAuthenticationTest(){
+        User user = generateUser();
+
+        when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> authenticationService.changePassword(user.getUsername(), "oldRaw",
+                "newPassword"));
+
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void changePassword_throwsAuthenticationFailed_whenUsernameDoesNotMatch() {
+
+        when(userRepository.findByUsername("John")).thenReturn(Optional.empty());
+
+        assertThrows(AuthenticationFailedException.class,
+                () -> authenticationService.changePassword("John", "old", "new"));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void changePassword_throwsAuthenticationFailed_whenPasswordDoesNotMatch() {
+        User user = generateUser();
+
+        when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(any(), any())).thenReturn(false);
+
+        assertThrows(AuthenticationFailedException.class,
+                () -> authenticationService.changePassword(user.getUsername(), "old", "new"));
+
+        verify(userRepository, never()).save(any());
     }
 
 }
