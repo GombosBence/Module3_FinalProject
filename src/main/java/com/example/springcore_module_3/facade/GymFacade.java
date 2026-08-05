@@ -3,10 +3,7 @@ package com.example.springcore_module_3.facade;
 import com.example.springcore_module_3.dto.*;
 import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.model.*;
-import com.example.springcore_module_3.service.AuthenticationService;
-import com.example.springcore_module_3.service.TraineeService;
-import com.example.springcore_module_3.service.TrainerService;
-import com.example.springcore_module_3.service.TrainingService;
+import com.example.springcore_module_3.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +19,15 @@ public class GymFacade {
     private final TrainerService trainerService;
     private final TrainingService trainingService;
     private final AuthenticationService authenticationService;
+    private final TrainingTypeService trainingTypeService;
 
-    public GymFacade(TraineeService traineeService, TrainerService trainerService, TrainingService trainingService, AuthenticationService authenticationService) {
+    public GymFacade(TraineeService traineeService, TrainerService trainerService, TrainingService trainingService
+            , AuthenticationService authenticationService, TrainingTypeService trainingTypeService) {
         this.traineeService = traineeService;
         this.trainerService = trainerService;
         this.trainingService = trainingService;
         this.authenticationService = authenticationService;
+        this.trainingTypeService = trainingTypeService;
     }
 
     // --- Trainee ---
@@ -125,5 +125,12 @@ public class GymFacade {
 
     public void login(String username, String password) {
         authenticationService.authenticate(username, password);
+    }
+
+
+    // --- TrainingType ---
+
+    public List<TrainingType> getTrainingTypes(AuthenticationRequest credentials) {
+        return trainingTypeService.findAll(credentials);
     }
 }

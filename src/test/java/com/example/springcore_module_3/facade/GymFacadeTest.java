@@ -4,10 +4,7 @@ import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.model.*;
-import com.example.springcore_module_3.service.AuthenticationService;
-import com.example.springcore_module_3.service.TraineeService;
-import com.example.springcore_module_3.service.TrainerService;
-import com.example.springcore_module_3.service.TrainingService;
+import com.example.springcore_module_3.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,12 +32,14 @@ class GymFacadeTest {
     private TrainingService trainingService;
     @Mock
     private AuthenticationService authenticationService;
+    @Mock
+    private TrainingTypeService trainingTypeService;
 
     private GymFacade facade;
 
     @BeforeEach
     void setUp() {
-        facade = new GymFacade(traineeService, trainerService, trainingService, authenticationService);
+        facade = new GymFacade(traineeService, trainerService, trainingService, authenticationService, trainingTypeService);
     }
 
     @Test
