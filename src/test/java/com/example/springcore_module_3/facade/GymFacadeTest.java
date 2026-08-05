@@ -104,7 +104,6 @@ class GymFacadeTest {
         Training expected = new Training();
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
-        TrainingType fitness = new TrainingType("FITNESS");
 
         when(trainingService.createTraining(credentials, "John.Doe", "Mike.Mentzer", "Sample", date, duration))
                 .thenReturn(expected);

@@ -1,6 +1,5 @@
 package com.example.springcore_module_3.controller;
 
-import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.request.UserPasswordChangeRequest;
 import com.example.springcore_module_3.facade.GymFacade;
 import io.swagger.v3.oas.annotations.Operation;
