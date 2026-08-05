@@ -42,17 +42,10 @@ public class TrainingServiceImplTest {
         trainingService = new TrainingServiceImpl(trainingRepository,traineeRepository, trainerRepository, authenticationService);
     }
 
-    private TrainingType fitness() {
-        TrainingType type = new TrainingType("FITNESS");
-        type.setTrainingTypeId(1L);
-        return type;
-    }
-
     @Test
     void createTrainingSuccessTest(){
         Trainee trainee = new Trainee();
         Trainer trainer = new Trainer();
-        TrainingType type = fitness();
         when(traineeRepository.findByUserUsername(any())).thenReturn(Optional.of(trainee));
         when(trainerRepository.findByUserUsername(any())).thenReturn(Optional.of(trainer));
         LocalDate date = LocalDate.of(2026, 3, 14);
