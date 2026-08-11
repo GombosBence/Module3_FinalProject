@@ -56,8 +56,6 @@ public class TraineeServiceImpl implements TraineeService {
         String username = usernameGenerator.generateUsername(user.getFirstName(), user.getLastName(),
                 userRepository::existsByUsername);
 
-
-
         String hashPassword = passwordEncoder.encode(password);
         user.setPassword(hashPassword);
         user.setUsername(username);
