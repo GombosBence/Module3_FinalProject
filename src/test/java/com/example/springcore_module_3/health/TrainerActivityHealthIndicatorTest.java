@@ -1,6 +1,5 @@
 package com.example.springcore_module_3.health;
 
-import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.repository.TrainerRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,8 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.Status;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
