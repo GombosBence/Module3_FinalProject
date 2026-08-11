@@ -3,6 +3,7 @@ package com.example.springcore_module_3.service;
 import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
+import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.User;
@@ -34,12 +35,13 @@ public class TraineeServiceImpl implements TraineeService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationService authenticationService;
     private final TrainerRepository trainerRepository;
+    private final GymMetrics  gymMetrics;
 
 
     public TraineeServiceImpl(TraineeRepository traineeRepository, PasswordGenerator passwordGenerator,
                               UsernameGenerator usernameGenerator, PasswordEncoder passwordEncoder,
                               AuthenticationService authenticationService, TrainingRepository trainingRepository, UserRepository userRepository,
-                              TrainerRepository trainerRepository) {
+                              TrainerRepository trainerRepository,  GymMetrics  gymMetrics) {
         this.traineeRepository = traineeRepository;
         this.passwordGenerator = passwordGenerator;
         this.usernameGenerator = usernameGenerator;
@@ -48,6 +50,7 @@ public class TraineeServiceImpl implements TraineeService {
         this.userRepository = userRepository;
         this.authenticationService = authenticationService;
         this.trainerRepository = trainerRepository;
+        this.gymMetrics = gymMetrics;
     }
 
     @Override
@@ -62,6 +65,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee newTrainee = new Trainee(user, address, dateOfBirth);
         traineeRepository.save(newTrainee);
         log.info("Trainee created with username: {}", username);
+        gymMetrics.incrementTraineeRegistrations();
         return new TraineeCreationResult(newTrainee, password);
     }
 

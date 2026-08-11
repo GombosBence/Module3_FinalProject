@@ -5,6 +5,7 @@ import com.example.springcore_module_3.dto.TraineeCreationResult;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
+import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
@@ -60,6 +61,9 @@ public class TraineeServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private GymMetrics gymMetrics;
+
     private TraineeServiceImpl traineeService;
 
     private TrainingType fitness() {
@@ -71,7 +75,7 @@ public class TraineeServiceImplTest {
     @BeforeEach
     void setUp() {
         traineeService = new TraineeServiceImpl(traineeRepository, passwordGenerator, usernameGenerator, passwordEncoder,
-                authenticationService, trainingRepository, userRepository, trainerRepository);
+                authenticationService, trainingRepository, userRepository, trainerRepository, gymMetrics);
     }
 
 

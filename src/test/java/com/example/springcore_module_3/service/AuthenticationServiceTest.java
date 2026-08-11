@@ -2,6 +2,7 @@ package com.example.springcore_module_3.service;
 
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
+import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,12 +25,14 @@ public class AuthenticationServiceTest {
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private GymMetrics gymMetrics;
 
     private AuthenticationService authenticationService;
 
     @BeforeEach
     void setUp() {
-        authenticationService = new AuthenticationServiceImpl(userRepository, passwordEncoder);
+        authenticationService = new AuthenticationServiceImpl(userRepository, passwordEncoder,  gymMetrics);
     }
 
     private User generateUser() {

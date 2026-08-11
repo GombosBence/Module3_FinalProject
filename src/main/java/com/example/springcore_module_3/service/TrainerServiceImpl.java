@@ -3,6 +3,7 @@ package com.example.springcore_module_3.service;
 import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
+import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.model.User;
@@ -28,16 +29,18 @@ public class TrainerServiceImpl implements TrainerService {
     private final UsernameGenerator usernameGenerator;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationService authenticationService;
+    private final GymMetrics gymMetrics;
 
     public TrainerServiceImpl(TrainerRepository trainerRepository, PasswordGenerator passwordGenerator,
                               UsernameGenerator usernameGenerator, PasswordEncoder encoder,
-                              UserRepository userRepository, AuthenticationService authenticationService) {
+                              UserRepository userRepository, AuthenticationService authenticationService, GymMetrics gymMetrics) {
         this.trainerRepository = trainerRepository;
         this.passwordGenerator = passwordGenerator;
         this.usernameGenerator = usernameGenerator;
         this.passwordEncoder = encoder;
         this.userRepository = userRepository;
         this.authenticationService = authenticationService;
+        this.gymMetrics = gymMetrics;
     }
 
 
@@ -53,6 +56,7 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer newTrainer = new Trainer(user, trainingType);
         trainerRepository.save(newTrainer);
         log.info("Trainer created with username: {}", username);
+        gymMetrics.incrementTrainerRegistrations();
         return new TrainerCreationResult(newTrainer, password);
     }
 

@@ -3,6 +3,7 @@ package com.example.springcore_module_3.service;
 import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
+import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,21 +19,26 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    private final GymMetrics gymMetrics;
+
+    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,  GymMetrics gymMetrics) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.gymMetrics = gymMetrics;
     }
 
     @Override
     public void authenticate(String username, String password) {
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> {
-            log.error("Username {} not found", username);
+            log.warn("Username {} not found", username);
+            gymMetrics.incrementFailedAuthentications();
             return new AuthenticationFailedException("Invalid username or password");
         });
 
         if(!passwordEncoder.matches(password, user.getPassword())) {
             log.warn("Authentication failed, password mismatch for username: {}", username);
+            gymMetrics.incrementFailedAuthentications();
             throw new AuthenticationFailedException("Invalid username or password");
         }
 

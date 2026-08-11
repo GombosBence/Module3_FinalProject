@@ -5,6 +5,7 @@ import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
+import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.model.User;
@@ -42,13 +43,15 @@ public class TrainerServiceImplTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private AuthenticationService authenticationService;
+    @Mock
+    private GymMetrics gymMetrics;
 
     private TrainerServiceImpl trainerService;
 
     @BeforeEach
     void setUp() {
         trainerService = new TrainerServiceImpl(trainerRepository, passwordGenerator, usernameGenerator,
-                passwordEncoder, userRepository, authenticationService);
+                passwordEncoder, userRepository, authenticationService, gymMetrics);
     }
 
     private TrainingType fitness() {
