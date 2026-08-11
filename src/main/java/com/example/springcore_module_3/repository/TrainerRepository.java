@@ -23,4 +23,6 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
         )
 """)
     List<Trainer> findUnassignedTrainers(@Param("traineeUsername")  String traineeUsername);
+
+    long countByUserIsActive(Boolean active);
 }
