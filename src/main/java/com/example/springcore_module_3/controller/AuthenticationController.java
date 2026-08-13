@@ -29,7 +29,8 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "401", description = "Authentication failed, invalid credentials")
     })
     @GetMapping
-    public ResponseEntity<Void> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Void> login(@RequestHeader("X-Username") String username,
+                                      @RequestHeader("X-Password") String password) {
         gymFacade.login(username, password);
         return ResponseEntity.ok().build();
     }
