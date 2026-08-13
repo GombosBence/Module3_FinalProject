@@ -81,7 +81,6 @@ public class TraineeServiceImpl implements TraineeService {
         if(trainee.getUser().getLastName() != null) original.getUser().setLastName(trainee.getUser().getLastName());
         if(trainee.getAddress() != null) original.setAddress(trainee.getAddress());
         if(trainee.getDateOfBirth() != null) original.setDateOfBirth(trainee.getDateOfBirth());
-        original.getUser().setActive(trainee.getUser().isActive());
 
         return traineeRepository.save(original);
     }
