@@ -59,11 +59,8 @@ class GymFacadeTest {
 
     @Test
     void deactivateTrainee_delegatesToTraineeService() {
-        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
-
-        facade.deactivateTrainee(credentials, "John.Doe");
-
-        verify(traineeService).deactivateTraineeProfile(credentials, "John.Doe");
+        facade.deactivateTrainee( "John.Doe");
+        verify(traineeService).deactivateTraineeProfile("John.Doe");
     }
 
     @Test
@@ -83,42 +80,38 @@ class GymFacadeTest {
 
     @Test
     void getTraineeTrainings_delegatesToTrainingService_andReturnsList() {
-        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         List<Training> expected = List.of(new Training(), new Training());
         LocalDate fromDate = LocalDate.of(2026, 1, 1);
         LocalDate toDate = LocalDate.of(2026, 12, 31);
 
-        when(trainingService.selectTraineeTrainings(credentials, "John.Doe", fromDate, toDate, "Sara.Connor", null))
+        when(trainingService.selectTraineeTrainings( "John.Doe", fromDate, toDate, "Sara.Connor", null))
                 .thenReturn(expected);
 
-        List<Training> result = facade.getTraineeTrainings(credentials, "John.Doe", fromDate, toDate, "Sara.Connor", null);
+        List<Training> result = facade.getTraineeTrainings("John.Doe", fromDate, toDate, "Sara.Connor", null);
 
         assertEquals(expected, result);
-        verify(trainingService).selectTraineeTrainings(any(), eq("John.Doe"),
+        verify(trainingService).selectTraineeTrainings(eq("John.Doe"),
                 eq(fromDate), eq(toDate), eq("Sara.Connor"), any());
     }
 
     @Test
     void createTraining_delegatesToTrainingService_withCorrectArgsAndReturnValue() {
-        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         Training expected = new Training();
         LocalDate date = LocalDate.of(2026, 3, 14);
         Duration duration = Duration.ofMinutes(90);
 
-        when(trainingService.createTraining(credentials, "John.Doe", "Mike.Mentzer", "Sample", date, duration))
+        when(trainingService.createTraining("John.Doe", "Mike.Mentzer", "Sample", date, duration))
                 .thenReturn(expected);
-        facade.createTraining(credentials, "John.Doe", "Mike.Mentzer", "Sample", date, duration);
+        facade.createTraining( "John.Doe", "Mike.Mentzer", "Sample", date, duration);
 
-        verify(trainingService).createTraining(credentials, "John.Doe", "Mike.Mentzer", "Sample", date, duration);
+        verify(trainingService).createTraining("John.Doe", "Mike.Mentzer", "Sample", date, duration);
     }
 
     @Test
     void updateTraineeTrainers_delegatesToTraineeService() {
-        AuthenticationRequest credentials = new AuthenticationRequest("John.Doe", "password");
         List<String> trainerUsernames = List.of("Mike.Mentzer", "Jane.Roe");
 
-        facade.updateTraineeTrainers(credentials, "John.Doe", trainerUsernames);
-
-        verify(traineeService).updateTraineeTrainers(credentials, "John.Doe", trainerUsernames );
+        facade.updateTraineeTrainers( "John.Doe", trainerUsernames);
+        verify(traineeService).updateTraineeTrainers("John.Doe", trainerUsernames );
     }
 }

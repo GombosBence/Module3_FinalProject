@@ -1,8 +1,10 @@
 package com.example.springcore_module_3.controller;
 
+import com.example.springcore_module_3.dto.request.LoginRequest;
 import com.example.springcore_module_3.dto.request.UserPasswordChangeRequest;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.facade.GymFacade;
+import com.example.springcore_module_3.util.JwtGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -13,8 +15,7 @@ import org.springframework.http.MediaType;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthenticationController.class)
@@ -29,12 +30,17 @@ public class AuthenticationControllerTest {
     @MockitoBean
     private GymFacade gymFacade;
 
+    @MockitoBean
+    private JwtGenerator jwtGenerator;
+
     @Test
     public void loginReturns200_whenCorrectCredentials() throws Exception {
 
-        mockMvc.perform(get("/api/auth")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "Password123"))
+        LoginRequest loginRequest = new LoginRequest("John.Doe", "Password123");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk());
 
         verify(gymFacade).login("John.Doe", "Password123");
@@ -43,12 +49,14 @@ public class AuthenticationControllerTest {
     @Test
     public void loginReturns401_whenIncorrectCredentials() throws Exception {
 
+        LoginRequest loginRequest = new LoginRequest("John.Doe", "Password123");
+
         doThrow(new AuthenticationFailedException("Invalid username or password"))
                 .when(gymFacade).login("John.Doe", "Password123");
 
-        mockMvc.perform(get("/api/auth")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "Password123"))
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
 
         verify(gymFacade).login("John.Doe", "Password123");

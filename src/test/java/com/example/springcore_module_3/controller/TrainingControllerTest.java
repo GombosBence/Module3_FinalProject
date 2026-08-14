@@ -2,6 +2,7 @@ package com.example.springcore_module_3.controller;
 
 import com.example.springcore_module_3.dto.request.TrainingCreationRequest;
 import com.example.springcore_module_3.facade.GymFacade;
+import com.example.springcore_module_3.util.JwtGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,6 +37,8 @@ public class TrainingControllerTest {
     @MockitoBean
     private GymFacade gymFacade;
 
+    @MockitoBean
+    private JwtGenerator jwtGenerator;
 
     @Test
     void addTraining_Returns200_success_test() throws Exception {
@@ -48,8 +52,7 @@ public class TrainingControllerTest {
         );
 
         mockMvc.perform(post("/api/training")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "Password123")
+                        .with(user("John.Doe"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
@@ -68,11 +71,10 @@ public class TrainingControllerTest {
 
         doThrow(new NoSuchElementException("Trainee with username Trainee.user not found"))
                 .when(gymFacade)
-                .createTraining(any(), eq("Trainee.user"), eq("Trainer.user"), any(), any(), any());
+                .createTraining(eq("Trainee.user"), eq("Trainer.user"), any(), any(), any());
 
         mockMvc.perform(post("/api/training")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "Password123")
+                        .with(user("John.Doe"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -81,12 +83,11 @@ public class TrainingControllerTest {
 
     @Test
     void getTraineeTrainings_returns200_success_test() throws Exception {
-        when(gymFacade.getTraineeTrainings(any(), eq("John.Doe"), any(), any(), any(), any()))
+        when(gymFacade.getTraineeTrainings(eq("John.Doe"), any(), any(), any(), any()))
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/training/trainee/John.Doe/trainings")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                         .param("periodFrom", "2026-01-01")
                         .param("periodTo", "2026-12-31"))
                 .andExpect(status().isOk());
@@ -94,12 +95,11 @@ public class TrainingControllerTest {
 
     @Test
     void getTrainerTrainings_returns200_success_test() throws Exception {
-        when(gymFacade.getTrainerTrainings(any(), eq("Mike.Wilson"), any(), any(), any()))
+        when(gymFacade.getTrainerTrainings(eq("Mike.Wilson"), any(), any(), any()))
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/training/trainer/Mike.Wilson/trainings")
-                        .header("X-Username", "Mike.Wilson")
-                        .header("X-Password", "rawPassword"))
+                        .with(user("John.Doe")))
                 .andExpect(status().isOk());
     }
 

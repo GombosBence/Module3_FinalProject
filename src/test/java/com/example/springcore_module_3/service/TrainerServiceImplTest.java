@@ -1,8 +1,6 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
-import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
 import com.example.springcore_module_3.metrics.GymMetrics;
@@ -11,15 +9,21 @@ import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.TrainerRepository;
 import com.example.springcore_module_3.repository.UserRepository;
+import com.example.springcore_module_3.util.AuthorizationHelper;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -42,7 +46,7 @@ public class TrainerServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private AuthenticationService authenticationService;
+    private AuthorizationHelper authorizationHelper;
     @Mock
     private GymMetrics gymMetrics;
 
@@ -51,7 +55,15 @@ public class TrainerServiceImplTest {
     @BeforeEach
     void setUp() {
         trainerService = new TrainerServiceImpl(trainerRepository, passwordGenerator, usernameGenerator,
-                passwordEncoder, userRepository, authenticationService, gymMetrics);
+                passwordEncoder, userRepository, authorizationHelper, gymMetrics);
+
+        Authentication auth = new UsernamePasswordAuthenticationToken("Mike.Wilson", null, List.of());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
     }
 
     private TrainingType fitness() {
@@ -81,42 +93,26 @@ public class TrainerServiceImplTest {
         User user = new User("Mike", "Wilson", "Mike.Wilson", "hashedPw");
         Trainer old = new Trainer(user, fitness());
         Trainer updated = new Trainer(user, fitness());
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
         when(trainerRepository.findByUserUsername("Mike.Wilson")).thenReturn(Optional.of(old));
 
-        assertDoesNotThrow(() -> trainerService.updateTrainerProfile(credentials, updated));
+        assertDoesNotThrow(() -> trainerService.updateTrainerProfile(updated));
+
+        verify(authorizationHelper).requireOwnAccount("Mike.Wilson");
         verify(trainerRepository).save(any(Trainer.class));
-    }
-
-    @Test
-    void updateTrainerProfile_throws_whenAuthenticationFails() {
-        User user = new User("Mike", "Wilson", "Mike.Wilson", "hashedPw");
-        Trainer incoming = new Trainer(user, fitness());
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "wrongPassword");
-
-        when(trainerRepository.findByUserUsername("Mike.Wilson")).thenReturn(Optional.of(incoming));
-        doThrow(new AuthenticationFailedException("Invalid username or password"))
-                .when(authenticationService).authenticateAndAuthorize("Mike.Wilson", "wrongPassword", "Mike.Wilson");
-
-        assertThrows(AuthenticationFailedException.class,
-                () -> trainerService.updateTrainerProfile(credentials, incoming));
-
-        verify(trainerRepository, never()).save(any());
     }
 
     @Test
     void updateTrainerProfile_throwsUnauthorized_whenActingOnDifferentProfile() {
         User targetUser = new User("Mike", "Wilson", "Mike.Wilson", "hashedPw");
         Trainer targetTrainer = new Trainer(targetUser, fitness());
-        AuthenticationRequest credentials = new AuthenticationRequest("Eve.Evil", "password");
 
         when(trainerRepository.findByUserUsername("Mike.Wilson")).thenReturn(Optional.of(targetTrainer));
         doThrow(new UnAuthorizedAccessException("You are not authorized to perform this operation"))
-                .when(authenticationService).authenticateAndAuthorize("Eve.Evil", "password", "Mike.Wilson");
+                .when(authorizationHelper).requireOwnAccount("Mike.Wilson");
 
         assertThrows(UnAuthorizedAccessException.class,
-                () -> trainerService.updateTrainerProfile(credentials, targetTrainer));
+                () -> trainerService.updateTrainerProfile(targetTrainer));
 
         verify(trainerRepository, never()).save(any());
     }
@@ -126,37 +122,39 @@ public class TrainerServiceImplTest {
         User user = new User("Mike", "Wilson", "Mike.Wilson", "hashedPw");
         Trainer trainer = new Trainer(user, fitness());
         trainer.setTrainerId(1L);
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
         when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
 
-        Trainer result = trainerService.selectTrainerProfile(credentials, 1L);
+        Trainer result = trainerService.selectTrainerProfile(1L);
 
         assertEquals("Mike.Wilson", result.getUser().getUsername());
-        verify(authenticationService).authenticate("Mike.Wilson", "password");
     }
 
     @Test
     void selectTrainerProfileByIdFailureTest() {
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
         when(trainerRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,
-                () -> trainerService.selectTrainerProfile(credentials, 999L));
+                () -> trainerService.selectTrainerProfile(999L));
     }
 
     @Test
     void selectTrainerProfileByUsernameSuccessTest() {
         User user = new User("Mike", "Wilson", "Mike.Wilson", "hashedPw");
         Trainer trainer = new Trainer(user, fitness());
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
         when(trainerRepository.findByUserUsername("Mike.Wilson")).thenReturn(Optional.of(trainer));
-
-        Trainer result = trainerService.selectTrainerProfileByUsername(credentials, "Mike.Wilson");
+        Trainer result = trainerService.selectTrainerProfileByUsername("Mike.Wilson");
 
         assertEquals("Mike.Wilson", result.getUser().getUsername());
-        verify(authenticationService).authenticate("Mike.Wilson", "password");
+    }
+
+    @Test
+    void selectTrainerProfileByUsernameFailureTest() {
+        when(trainerRepository.findByUserUsername("Nobody.Here")).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class,
+                () -> trainerService.selectTrainerProfileByUsername("Nobody.Here"));
     }
 
     @Test
@@ -165,23 +163,23 @@ public class TrainerServiceImplTest {
         Trainer trainer = new Trainer(user, fitness());
         trainer.setTrainerId(1L);
         trainer.getUser().setActive(true);
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
         when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
-        assertDoesNotThrow(() -> trainerService.deactivateTrainerProfile(credentials, user.getUsername()));
+        assertDoesNotThrow(() -> trainerService.deactivateTrainerProfile(user.getUsername()));
 
         assertFalse(trainer.getUser().isActive());
+        verify(authorizationHelper).requireOwnAccount("Mike.Wilson");
         verify(trainerRepository).save(trainer);
     }
 
     @Test
     void deactivateTrainerProfile_throws_whenTrainerDoesNotExist() {
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
-        when(trainerRepository.findByUserUsername(credentials.username())).thenReturn(Optional.empty());
+        when(trainerRepository.findByUserUsername("Mike.Wilson")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,
-                () -> trainerService.deactivateTrainerProfile(credentials, credentials.username()));
+                () -> trainerService.deactivateTrainerProfile("Mike.Wilson"));
+
         verify(trainerRepository, never()).save(any());
     }
 
@@ -191,12 +189,12 @@ public class TrainerServiceImplTest {
         Trainer trainer = new Trainer(user, fitness());
         trainer.setTrainerId(1L);
         trainer.getUser().setActive(false);
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
         when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
         assertThrows(InvalidStateTransitionException.class,
-                () -> trainerService.deactivateTrainerProfile(credentials, user.getUsername()));
+                () -> trainerService.deactivateTrainerProfile(user.getUsername()));
+
         verify(trainerRepository, never()).save(any());
     }
 
@@ -206,14 +204,24 @@ public class TrainerServiceImplTest {
         Trainer trainer = new Trainer(user, fitness());
         trainer.setTrainerId(1L);
         trainer.getUser().setActive(false);
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
         when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
-        assertDoesNotThrow(() -> trainerService.activateTrainerProfile(credentials, user.getUsername()));
+        assertDoesNotThrow(() -> trainerService.activateTrainerProfile(user.getUsername()));
 
         assertTrue(trainer.getUser().isActive());
+        verify(authorizationHelper).requireOwnAccount("Mike.Wilson");
         verify(trainerRepository).save(trainer);
+    }
+
+    @Test
+    void activateTrainerProfile_throws_whenTrainerDoesNotExist() {
+        when(trainerRepository.findByUserUsername("Mike.Wilson")).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class,
+                () -> trainerService.activateTrainerProfile("Mike.Wilson"));
+
+        verify(trainerRepository, never()).save(any());
     }
 
     @Test
@@ -222,12 +230,12 @@ public class TrainerServiceImplTest {
         Trainer trainer = new Trainer(user, fitness());
         trainer.setTrainerId(1L);
         trainer.getUser().setActive(true);
-        AuthenticationRequest credentials = new AuthenticationRequest("Mike.Wilson", "password");
 
         when(trainerRepository.findByUserUsername(user.getUsername())).thenReturn(Optional.of(trainer));
 
         assertThrows(InvalidStateTransitionException.class,
-                () -> trainerService.activateTrainerProfile(credentials, user.getUsername()));
+                () -> trainerService.activateTrainerProfile(user.getUsername()));
+
         verify(trainerRepository, never()).save(any());
     }
 }
