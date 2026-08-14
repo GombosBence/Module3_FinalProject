@@ -47,6 +47,7 @@ public class AuthenticationServiceTest {
     @Test
     void successfulAuthenticationTest(){
         User user = generateUser();
+        user.setActive(true);
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password", user.getPassword())).thenReturn(Boolean.TRUE);
 

@@ -33,8 +33,8 @@ public class AuthenticationControllerTest {
     public void loginReturns200_whenCorrectCredentials() throws Exception {
 
         mockMvc.perform(get("/api/auth")
-                        .param("username", "John.Doe")
-                        .param("password", "Password123"))
+                        .header("X-Username", "John.Doe")
+                        .header("X-Password", "Password123"))
                 .andExpect(status().isOk());
 
         verify(gymFacade).login("John.Doe", "Password123");
@@ -47,8 +47,8 @@ public class AuthenticationControllerTest {
                 .when(gymFacade).login("John.Doe", "Password123");
 
         mockMvc.perform(get("/api/auth")
-                    .param("username", "John.Doe")
-                    .param("password", "Password123"))
+                        .header("X-Username", "John.Doe")
+                        .header("X-Password", "Password123"))
                 .andExpect(status().isUnauthorized());
 
         verify(gymFacade).login("John.Doe", "Password123");
