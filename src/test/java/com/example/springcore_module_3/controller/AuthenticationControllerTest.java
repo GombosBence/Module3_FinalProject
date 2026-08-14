@@ -5,6 +5,7 @@ import com.example.springcore_module_3.dto.request.UserPasswordChangeRequest;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.facade.GymFacade;
 import com.example.springcore_module_3.util.JwtGenerator;
+import com.example.springcore_module_3.util.TokenBlockList;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -32,6 +33,9 @@ public class AuthenticationControllerTest {
 
     @MockitoBean
     private JwtGenerator jwtGenerator;
+
+    @MockitoBean
+    private TokenBlockList tokenBlockList;
 
     @Test
     public void loginReturns200_whenCorrectCredentials() throws Exception {

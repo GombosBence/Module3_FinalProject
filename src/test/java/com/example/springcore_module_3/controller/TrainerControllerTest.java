@@ -11,6 +11,7 @@ import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.util.JwtGenerator;
+import com.example.springcore_module_3.util.TokenBlockList;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -41,6 +42,9 @@ public class TrainerControllerTest {
 
     @MockitoBean
     private JwtGenerator jwtGenerator;
+
+    @MockitoBean
+    private TokenBlockList tokenBlockList;
 
     private User sampleUser(String username) {
         return new User("John", "Doe", username, "hashedPw");

@@ -5,6 +5,7 @@ import com.example.springcore_module_3.dto.request.UserPasswordChangeRequest;
 import com.example.springcore_module_3.dto.response.LoginResponse;
 import com.example.springcore_module_3.facade.GymFacade;
 import com.example.springcore_module_3.util.JwtGenerator;
+import com.example.springcore_module_3.util.TokenBlockList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,10 +23,12 @@ public class AuthenticationController {
 
     private final GymFacade gymFacade;
     private final JwtGenerator jwtGenerator;
+    private final TokenBlockList tokenBlockList;
 
-    public AuthenticationController(GymFacade gymFacade, JwtGenerator jwtGenerator) {
+    public AuthenticationController(GymFacade gymFacade, JwtGenerator jwtGenerator, TokenBlockList tokenBlockList) {
         this.gymFacade = gymFacade;
         this.jwtGenerator = jwtGenerator;
+        this.tokenBlockList = tokenBlockList;
     }
 
     @Operation(summary = "Login", description = "Username and password authentication")
@@ -49,6 +52,13 @@ public class AuthenticationController {
     public ResponseEntity<Void> changeUserPassword(@RequestBody @Valid UserPasswordChangeRequest request) {
 
         gymFacade.changeUserPassword(request.username(), request.oldPassword(), request.newPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader){
+        String token = authHeader.substring(7);
+        tokenBlockList.revokeToken(token);
         return ResponseEntity.ok().build();
     }
 

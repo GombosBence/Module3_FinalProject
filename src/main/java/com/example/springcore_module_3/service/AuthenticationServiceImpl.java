@@ -79,4 +79,5 @@ public class AuthenticationServiceImpl implements AuthenticationService{
         userRepository.save(user);
         log.info("Password has been successfully changed for username: {}", username);
     }
+
 }

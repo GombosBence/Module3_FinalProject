@@ -1,6 +1,7 @@
 package com.example.springcore_module_3.filter;
 
 import com.example.springcore_module_3.util.JwtGenerator;
+import com.example.springcore_module_3.util.TokenBlockList;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -21,9 +22,11 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtGenerator jwtGenerator;
+    private final TokenBlockList tokenBlockList;
 
-    public JwtAuthFilter(JwtGenerator jwtGenerator) {
+    public JwtAuthFilter(JwtGenerator jwtGenerator, TokenBlockList tokenBlockList) {
         this.jwtGenerator = jwtGenerator;
+        this.tokenBlockList = tokenBlockList;
     }
 
     @Override
@@ -34,6 +37,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
+            if(tokenBlockList.isRevoked(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             try{
                 Claims claims = jwtGenerator.extractClaims(token);
                 String username = claims.getSubject();

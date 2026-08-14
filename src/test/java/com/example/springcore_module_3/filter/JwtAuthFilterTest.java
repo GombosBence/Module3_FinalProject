@@ -1,6 +1,7 @@
 package com.example.springcore_module_3.filter;
 
 import com.example.springcore_module_3.util.JwtGenerator;
+import com.example.springcore_module_3.util.TokenBlockList;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +30,9 @@ public class JwtAuthFilterTest {
     @InjectMocks
     private JwtAuthFilter jwtAuthFilter;
 
+    @Mock
+    private TokenBlockList tokenBlockList;
+
     @AfterEach
     void clearSecurityContext() {
         SecurityContextHolder.clearContext();
@@ -43,6 +47,7 @@ public class JwtAuthFilterTest {
         Claims claims = mock(Claims.class);
         when(claims.getSubject()).thenReturn("John.Doe");
         when(jwtGenerator.extractClaims("valid.jwt.token")).thenReturn(claims);
+        when(tokenBlockList.isRevoked("valid.jwt.token")).thenReturn(false);
 
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
@@ -68,6 +73,7 @@ public class JwtAuthFilterTest {
         request.addHeader("Authorization", "Bearer garbage.token");
 
         when(jwtGenerator.extractClaims("garbage.token")).thenThrow(new io.jsonwebtoken.JwtException("bad signature"));
+        when(tokenBlockList.isRevoked("garbage.token")).thenReturn(false);
 
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
