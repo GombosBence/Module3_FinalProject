@@ -1,6 +1,5 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.metrics.GymMetrics;
@@ -9,6 +8,7 @@ import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.TrainerRepository;
 import com.example.springcore_module_3.repository.UserRepository;
+import com.example.springcore_module_3.util.AuthorizationHelper;
 import com.example.springcore_module_3.util.PasswordGenerator;
 import com.example.springcore_module_3.util.UsernameGenerator;
 import jakarta.validation.constraints.NotNull;
@@ -28,18 +28,18 @@ public class TrainerServiceImpl implements TrainerService {
     private final PasswordGenerator passwordGenerator;
     private final UsernameGenerator usernameGenerator;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationService authenticationService;
+    private final AuthorizationHelper authorizationHelper;
     private final GymMetrics gymMetrics;
 
     public TrainerServiceImpl(TrainerRepository trainerRepository, PasswordGenerator passwordGenerator,
                               UsernameGenerator usernameGenerator, PasswordEncoder encoder,
-                              UserRepository userRepository, AuthenticationService authenticationService, GymMetrics gymMetrics) {
+                              UserRepository userRepository, AuthorizationHelper authorizationHelper, GymMetrics gymMetrics) {
         this.trainerRepository = trainerRepository;
         this.passwordGenerator = passwordGenerator;
         this.usernameGenerator = usernameGenerator;
         this.passwordEncoder = encoder;
         this.userRepository = userRepository;
-        this.authenticationService = authenticationService;
+        this.authorizationHelper = authorizationHelper;
         this.gymMetrics = gymMetrics;
     }
 
@@ -62,14 +62,14 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public Trainer updateTrainerProfile(@NotNull AuthenticationRequest credentials, Trainer trainer) {
+    public Trainer updateTrainerProfile(Trainer trainer) {
 
         Trainer original = trainerRepository.findByUserUsername(trainer.getUser().getUsername()).orElseThrow(() -> {
             log.warn("Trainer not found with username: {}", trainer.getUser().getUsername());
             return new NoSuchElementException("Trainer not found with username: " + trainer.getUser().getUsername());
         });
 
-        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainer.getUser().getUsername());
+        authorizationHelper.requireOwnAccount(trainer.getUser().getUsername());
 
         if(trainer.getUser().getFirstName() != null) original.getUser().setFirstName(trainer.getUser().getFirstName());
         if(trainer.getUser().getLastName() != null) original.getUser().setLastName(trainer.getUser().getLastName());
@@ -81,14 +81,14 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void deactivateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull String username) {
+    public void deactivateTrainerProfile(@NotNull String username) {
 
         Trainer trainer = trainerRepository.findByUserUsername(username).orElseThrow(() -> {
             log.warn("Trainer not found with username : {}", username);
             return new NoSuchElementException("Trainer not found with username: " + username);
         });
 
-        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainer.getUser().getUsername());
+        authorizationHelper.requireOwnAccount(username);
 
         if(!trainer.getUser().isActive()){
             log.warn("Attempted to deactivate an already inactive Trainer");
@@ -102,14 +102,14 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void activateTrainerProfile(@NotNull AuthenticationRequest credentials, @NotNull String username) {
+    public void activateTrainerProfile(@NotNull String username) {
 
         Trainer trainer = trainerRepository.findByUserUsername(username).orElseThrow(() -> {
             log.warn("Trainer not found with id : {}", username);
             return new NoSuchElementException("Trainer not found with id: " + username);
         });
 
-        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), trainer.getUser().getUsername());
+        authorizationHelper.requireOwnAccount(username);
 
         if(trainer.getUser().isActive()){
             log.warn("Attempted to activate an already active Trainer");
@@ -122,14 +122,12 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
-    public Trainer selectTrainerProfile(@NotNull AuthenticationRequest credentials, Long id) {
-        authenticationService.authenticate(credentials.username(), credentials.password());
+    public Trainer selectTrainerProfile(Long id) {
         return trainerRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Trainer with id " + id + " does not exist"));
     }
 
     @Override
-    public Trainer selectTrainerProfileByUsername(@NotNull AuthenticationRequest credentials, String username) {
-        authenticationService.authenticate(credentials.username(), credentials.password());
+    public Trainer selectTrainerProfileByUsername(String username) {
         return trainerRepository.findByUserUsername(username).orElseThrow(() -> new NoSuchElementException("Trainer with username " + username + " does not exist"));
     }
 }

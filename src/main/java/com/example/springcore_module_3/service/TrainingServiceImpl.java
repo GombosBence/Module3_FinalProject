@@ -4,7 +4,6 @@ import com.example.springcore_module_3.dto.request.AuthenticationRequest;
 import com.example.springcore_module_3.model.Trainee;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.Training;
-import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.repository.TraineeRepository;
 import com.example.springcore_module_3.repository.TrainerRepository;
 import com.example.springcore_module_3.repository.TrainingRepository;
@@ -25,24 +24,18 @@ public class TrainingServiceImpl implements TrainingService {
     private final TrainingRepository trainingRepository;
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
-    private final AuthenticationService authenticationService;
 
-    public TrainingServiceImpl(TrainingRepository trainingRepository,  TraineeRepository traineeRepository, TrainerRepository trainerRepository,
-                               AuthenticationService authenticationService) {
+    public TrainingServiceImpl(TrainingRepository trainingRepository,  TraineeRepository traineeRepository, TrainerRepository trainerRepository) {
         this.trainingRepository = trainingRepository;
         this.traineeRepository = traineeRepository;
         this.trainerRepository = trainerRepository;
-        this.authenticationService = authenticationService;
     }
 
     @Override
     @Transactional
-    public Training createTraining(@NotNull AuthenticationRequest credentials,
-                                   @NotNull String traineeUsername, @NotNull String trainerUsername,
+    public Training createTraining(@NotNull String traineeUsername, @NotNull String trainerUsername,
                                    String trainingName, LocalDate trainingDate,
                                    Duration trainingDuration) {
-
-        authenticationService.authenticate(credentials.username(), credentials.password());
 
         Trainee trainee = traineeRepository.findByUserUsername(traineeUsername).orElseThrow(() -> {
             log.warn("Trainee with username {} not found", traineeUsername);
@@ -61,14 +54,12 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    public List<Training> selectTraineeTrainings(@NotNull AuthenticationRequest credentials, String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
-        authenticationService.authenticate(credentials.username(), credentials.password());
+    public List<Training> selectTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
         return trainingRepository.findTraineeTrainings(username, fromDate, toDate, trainerName, trainingType);
     }
 
     @Override
-    public List<Training> selectTrainerTrainings(@NotNull AuthenticationRequest credentials, String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
-        authenticationService.authenticate(credentials.username(), credentials.password());
+    public List<Training> selectTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         return trainingRepository.findTrainerTrainings(username, fromDate, toDate, traineeName);
     }
 }

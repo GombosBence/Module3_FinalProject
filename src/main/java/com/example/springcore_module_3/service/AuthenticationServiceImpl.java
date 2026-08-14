@@ -6,6 +6,7 @@ import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
 import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.UserRepository;
+import com.example.springcore_module_3.util.JwtGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,6 @@ public class AuthenticationServiceImpl implements AuthenticationService{
             log.warn("Authentication attempted for deactivated username={}", username);
             throw new AuthenticationFailedException("Invalid username or password");
         }
-
         log.debug("Authentication successful for username: {}", username);
     }
 
