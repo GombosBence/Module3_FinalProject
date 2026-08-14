@@ -74,7 +74,6 @@ public class TrainerServiceImpl implements TrainerService {
         if(trainer.getUser().getFirstName() != null) original.getUser().setFirstName(trainer.getUser().getFirstName());
         if(trainer.getUser().getLastName() != null) original.getUser().setLastName(trainer.getUser().getLastName());
         if(trainer.getSpecialization() != null) original.setSpecialization(trainer.getSpecialization());
-        original.getUser().setActive(trainer.getUser().isActive());
 
         trainerRepository.save(original);
         return original;

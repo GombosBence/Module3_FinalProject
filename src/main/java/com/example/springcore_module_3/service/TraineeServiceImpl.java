@@ -83,7 +83,6 @@ public class TraineeServiceImpl implements TraineeService {
         if(trainee.getUser().getLastName() != null) original.getUser().setLastName(trainee.getUser().getLastName());
         if(trainee.getAddress() != null) original.setAddress(trainee.getAddress());
         if(trainee.getDateOfBirth() != null) original.setDateOfBirth(trainee.getDateOfBirth());
-        original.getUser().setActive(trainee.getUser().isActive());
 
         return traineeRepository.save(original);
     }
@@ -92,13 +91,13 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     public void deactivateTraineeProfile(@NotNull AuthenticationRequest credentials, String username) {
 
-        authenticationService.authenticate(credentials.username(), credentials.password());
         Trainee trainee = traineeRepository.findByUserUsername(username)
                 .orElseThrow(() -> {
                     log.warn("Attempted to deactivate non-existing trainee username={}", username);
                     return new NoSuchElementException("Trainee with username " + username + " does not exist");
                 });
 
+        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), username);
 
         if(!trainee.getUser().isActive()) {
             log.warn("Attempted to deactivate already inactive trainee username={}", username);
@@ -114,13 +113,12 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     public void activateTraineeProfile(@NotNull AuthenticationRequest credentials, String username) {
 
-        authenticationService.authenticate(credentials.username(), credentials.password());
         Trainee trainee = traineeRepository.findByUserUsername(username)
                 .orElseThrow(() -> {
                     log.warn("Attempted to activate non-existing trainee username={}", username);
                     return new NoSuchElementException("Trainee with username " + username + " does not exist");
                 });
-
+        authenticationService.authenticateAndAuthorize(credentials.username(), credentials.password(), username);
 
         if(trainee.getUser().isActive()) {
             log.warn("Attempted to activate already active trainee username={}", username);

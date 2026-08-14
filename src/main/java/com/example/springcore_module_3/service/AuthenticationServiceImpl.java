@@ -42,6 +42,11 @@ public class AuthenticationServiceImpl implements AuthenticationService{
             throw new AuthenticationFailedException("Invalid username or password");
         }
 
+        if (!user.isActive()) {
+            log.warn("Authentication attempted for deactivated username={}", username);
+            throw new AuthenticationFailedException("Invalid username or password");
+        }
+
         log.debug("Authentication successful for username: {}", username);
     }
 
