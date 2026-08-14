@@ -21,7 +21,7 @@ public class JwtGenerator {
     private final PublicKey publicKey;
 
     public JwtGenerator(@Value("${certificate.path}") String path, @Value("${certificate.password}") char[] password,
-                        @Value("{certificate.alias}") String alias) throws KeyStoreException, IOException,
+                        @Value("${certificate.alias}") String alias) throws KeyStoreException, IOException,
             CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
 
         KeyStore keyStore = KeyStore.getInstance("jks");
