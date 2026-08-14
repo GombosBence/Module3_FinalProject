@@ -61,15 +61,9 @@ public class TraineeController {
             @ApiResponse(responseCode = "404", description = "Requested trainee not found")
     })
     @GetMapping("/{username}")
-    public ResponseEntity<TraineeGetProfileResponse> getTrainee(
-            @PathVariable String username,
-            @RequestHeader("X-Username") String authUsername,
-            @RequestHeader("X-Password") String authPassword)
+    public ResponseEntity<TraineeGetProfileResponse> getTrainee(@PathVariable String username)
     {
-
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        Trainee trainee = gymFacade.getTraineeByUsername(credentials, username);
-
+        Trainee trainee = gymFacade.getTraineeByUsername(username);
         return ResponseEntity.ok(TraineeMapper.toProfileResponse(trainee));
     }
 
@@ -83,15 +77,9 @@ public class TraineeController {
             @ApiResponse(responseCode = "404", description = "Requested trainee not found")
     })
     @PutMapping("/{username}")
-    public ResponseEntity<TraineeUpdateResponse> updateTrainee(@PathVariable String username,
-                                                               @RequestHeader("X-Username") String authUsername,
-                                                               @RequestHeader("X-Password") String authPassword,
-                                                               @RequestBody @Valid TraineeUpdateRequest request)
+    public ResponseEntity<TraineeUpdateResponse> updateTrainee(@PathVariable String username, @RequestBody @Valid TraineeUpdateRequest request)
     {
-
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        Trainee trainee = gymFacade.updateTrainee(credentials, TraineeMapper.toTrainee(username, request));
-
+        Trainee trainee = gymFacade.updateTrainee(TraineeMapper.toTrainee(username, request));
         return ResponseEntity.ok(TraineeMapper.toUpdateResponse(trainee));
     }
 
@@ -104,13 +92,9 @@ public class TraineeController {
             @ApiResponse(responseCode = "404", description = "Requested trainee not found")
     })
     @DeleteMapping("/{username}")
-    public ResponseEntity<Void> deleteTrainee(@PathVariable String username,
-                                              @RequestHeader("X-Username") String authUsername,
-                                              @RequestHeader("X-Password") String authPassword)
+    public ResponseEntity<Void> deleteTrainee(@PathVariable String username)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        gymFacade.deleteTrainee(credentials, username);
-
+        gymFacade.deleteTrainee(username);
         return ResponseEntity.ok().build();
     }
 
@@ -122,15 +106,10 @@ public class TraineeController {
             @ApiResponse(responseCode = "404", description = "Requested trainee not found")
     })
     @GetMapping("/{username}/unassigned-trainers")
-    public ResponseEntity<List<TrainerProfileDto>> getTraineeUnassignedTrainers(@PathVariable String username,
-                                                                                @RequestHeader("X-Username") String authUsername,
-                                                                                @RequestHeader("X-Password") String authPassword)
+    public ResponseEntity<List<TrainerProfileDto>> getTraineeUnassignedTrainers(@PathVariable String username)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        List<Trainer> result = gymFacade.getUnassignedTrainers(credentials, username);
-
+        List<Trainer> result = gymFacade.getUnassignedTrainers(username);
         List<TrainerProfileDto> profiles = result.stream().map(TrainerMapper::toProfileDto).toList();
-
         return ResponseEntity.ok(profiles);
     }
 
@@ -145,15 +124,10 @@ public class TraineeController {
     })
     @PutMapping("/{username}/trainers")
     public ResponseEntity<List<TrainerProfileDto>> updateTraineeTrainerList(@PathVariable String username,
-                                                                            @RequestHeader("X-Username") String authUsername,
-                                                                            @RequestHeader("X-Password") String authPassword,
                                                                             @RequestBody @Valid UpdateTraineeTrainersRequest request)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        List<Trainer> result = gymFacade.updateTraineeTrainers(credentials, username, request.trainerUsernames());
-
+        List<Trainer> result = gymFacade.updateTraineeTrainers(username ,request.trainerUsernames());
         List<TrainerProfileDto> profiles = result.stream().map(TrainerMapper::toProfileDto).toList();
-
         return ResponseEntity.ok(profiles);
     }
 
@@ -166,19 +140,13 @@ public class TraineeController {
             @ApiResponse(responseCode = "404", description = "Requested trainee not found")
     })
     @PatchMapping("/status")
-    public ResponseEntity<Void> setTraineeActiveStatus(
-            @RequestHeader("X-Username") String authUsername,
-            @RequestHeader("X-Password") String authPassword,
-            @RequestBody @Valid TraineeSetActivateRequest request) {
-
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
+    public ResponseEntity<Void> setTraineeActiveStatus(@RequestBody @Valid TraineeSetActivateRequest request) {
 
         if (request.isActive()) {
-            gymFacade.activateTrainee(credentials, request.username());
+            gymFacade.activateTrainee(request.username());
         } else {
-            gymFacade.deactivateTrainee(credentials, request.username());
+            gymFacade.deactivateTrainee(request.username());
         }
-
         return ResponseEntity.ok().build();
     }
 }

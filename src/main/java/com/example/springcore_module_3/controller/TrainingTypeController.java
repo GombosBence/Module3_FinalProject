@@ -37,13 +37,10 @@ public class TrainingTypeController {
             @ApiResponse(responseCode = "401", description = "Authentication failed, invalid credentials")
     })
     @GetMapping
-    public ResponseEntity<List<TrainingTypeDto>> getTrainingTypes(@RequestHeader("X-Username") String authUsername,
-                                                  @RequestHeader("X-Password") String authPassword)
+    public ResponseEntity<List<TrainingTypeDto>> getTrainingTypes()
     {
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest(authUsername, authPassword);
-        List<TrainingType> trainingTypes = gymFacade.getTrainingTypes(authenticationRequest);
+        List<TrainingType> trainingTypes = gymFacade.getTrainingTypes();
         List<TrainingTypeDto> response = trainingTypes.stream().map(TrainingTypeMapper::toDto).toList();
-
         return ResponseEntity.ok(response);
     }
 
