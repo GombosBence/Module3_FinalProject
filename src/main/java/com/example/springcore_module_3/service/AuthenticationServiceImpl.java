@@ -1,12 +1,11 @@
 package com.example.springcore_module_3.service;
 
-import com.example.springcore_module_3.dto.request.AuthenticationRequest;
+import com.example.springcore_module_3.exception.UserAccountLockedException;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
-import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
 import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.UserRepository;
-import com.example.springcore_module_3.util.JwtGenerator;
+import com.example.springcore_module_3.util.LoginAttemptTracker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,12 +19,16 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 
     private final PasswordEncoder passwordEncoder;
 
+    private final LoginAttemptTracker loginAttemptTracker;
+
     private final GymMetrics gymMetrics;
 
-    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,  GymMetrics gymMetrics) {
+    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,  GymMetrics gymMetrics,
+                                     LoginAttemptTracker loginAttemptTracker) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.gymMetrics = gymMetrics;
+        this.loginAttemptTracker = loginAttemptTracker;
     }
 
     @Override
@@ -37,27 +40,25 @@ public class AuthenticationServiceImpl implements AuthenticationService{
             return new AuthenticationFailedException("Invalid username or password");
         });
 
+        if(loginAttemptTracker.isLocked(username)) {
+            log.warn("Login attempt blocked, username {} has been locked", username);
+            throw new UserAccountLockedException("Account has been locked due to too many failed attempts");
+        }
+
         if(!passwordEncoder.matches(password, user.getPassword())) {
             log.warn("Authentication failed, password mismatch for username: {}", username);
             gymMetrics.incrementFailedAuthentications();
+            loginAttemptTracker.recordFailure(username);
             throw new AuthenticationFailedException("Invalid username or password");
         }
 
         if (!user.isActive()) {
             log.warn("Authentication attempted for deactivated username={}", username);
+            loginAttemptTracker.recordFailure(username);
             throw new AuthenticationFailedException("Invalid username or password");
         }
         log.debug("Authentication successful for username: {}", username);
-    }
-
-    @Override
-    public void authenticateAndAuthorize(String username, String password, String targetUsername) {
-        authenticate(username, password);
-
-        if(!username.equals(targetUsername)) {
-            log.warn("User {} attempted to act on profile {}", username, targetUsername);
-            throw new UnAuthorizedAccessException("You are not authorized to perform this operation");
-        }
+        loginAttemptTracker.recordSuccess(username);
     }
 
     @Override

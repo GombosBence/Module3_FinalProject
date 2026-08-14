@@ -6,7 +6,5 @@ public interface AuthenticationService {
 
     void authenticate(String username, String password);
 
-    void authenticateAndAuthorize(String username, String password, String targetUsername);
-
     void changePassword(String username, String oldPassword, String newPassword);
 }
