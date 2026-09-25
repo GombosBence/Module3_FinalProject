@@ -59,13 +59,9 @@ public class TrainerController {
             @ApiResponse(responseCode = "404", description = "Requested trainer not found")
     })
     @GetMapping("/{username}")
-    public ResponseEntity<TrainerGetProfileResponse> getTrainer(@PathVariable String username,
-                                                                @RequestHeader("X-Username") String authUsername,
-                                                                @RequestHeader("X-Password") String authPassword)
+    public ResponseEntity<TrainerGetProfileResponse> getTrainer(@PathVariable String username)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        Trainer trainer = gymFacade.getTrainerByUsername(credentials, username);
-
+        Trainer trainer = gymFacade.getTrainerByUsername(username);
         return ResponseEntity.ok(TrainerMapper.toGetProfileResponse(trainer));
     }
 
@@ -80,15 +76,10 @@ public class TrainerController {
     })
     @PutMapping("/{username}")
     public ResponseEntity<TrainerUpdateResponse> updateTrainerProfile(@PathVariable String username,
-                                                                      @RequestHeader("X-Username") String authUsername,
-                                                                      @RequestHeader("X-Password") String authPassword,
                                                                       @RequestBody @Valid TrainerUpdateProfileRequest request)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        Trainer trainer = gymFacade.updateTrainer(credentials, TrainerMapper.toTrainer(username, request));
-
+        Trainer trainer = gymFacade.updateTrainer(TrainerMapper.toTrainer(username, request));
         return ResponseEntity.ok(TrainerMapper.toUpdateResponse(trainer));
-
     }
 
 
@@ -101,18 +92,14 @@ public class TrainerController {
             @ApiResponse(responseCode = "404", description = "Requested trainer not found")
     })
     @PatchMapping("/status")
-    public ResponseEntity<Void> setTrainerActiveStatus(@RequestHeader("X-Username") String authUsername,
-                                                       @RequestHeader("X-Password") String authPassword,
-                                                       @RequestBody @Valid TrainerSetActivateRequest request)
+    public ResponseEntity<Void> setTrainerActiveStatus(@RequestBody @Valid TrainerSetActivateRequest request)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
         if(request.isActive()){
-            gymFacade.activateTrainer(credentials, request.username());
+            gymFacade.activateTrainer(request.username());
 
         }else {
-            gymFacade.deactivateTrainer(credentials, request.username());
+            gymFacade.deactivateTrainer(request.username());
         }
-
         return ResponseEntity.ok().build();
     }
 }

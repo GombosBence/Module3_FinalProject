@@ -42,14 +42,10 @@ public class TrainingController {
             @ApiResponse(responseCode = "404", description = "Requested trainee/trainer not found")
     })
     @PostMapping
-    public ResponseEntity<Void> addTraining(@RequestHeader("X-Username") String authUsername,
-                                            @RequestHeader("X-Password") String authPassword,
-                                            @RequestBody @Valid TrainingCreationRequest request)
+    public ResponseEntity<Void> addTraining(@RequestBody @Valid TrainingCreationRequest request)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        gymFacade.createTraining(credentials, request.traineeUsername(), request.trainerUsername(), request.trainingName(),
+        gymFacade.createTraining(request.traineeUsername(), request.trainerUsername(), request.trainingName(),
                 request.trainingDate(), request.trainingDuration());
-
         return ResponseEntity.ok().build();
     }
 
@@ -60,15 +56,12 @@ public class TrainingController {
     })
     @GetMapping("/trainee/{username}/trainings")
     public ResponseEntity<List<TraineeTrainingDto>> getTraineeTraining(@PathVariable("username") String username,
-                                                                       @RequestHeader("X-Username") String authUsername,
-                                                                       @RequestHeader("X-Password") String authPassword,
                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodFrom,
                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodTo,
                                                                        @RequestParam(required = false) String trainerName,
                                                                        @RequestParam(required = false) String trainingType)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        List<Training> result = gymFacade.getTraineeTrainings(credentials, username, periodFrom, periodTo, trainerName, trainingType);
+        List<Training> result = gymFacade.getTraineeTrainings(username, periodFrom, periodTo, trainerName, trainingType);
 
         return ResponseEntity.ok(TrainingMapper.mapToTraineeTrainingResponse(result));
     }
@@ -80,15 +73,11 @@ public class TrainingController {
     })
     @GetMapping("/trainer/{username}/trainings")
     public ResponseEntity<List<TrainerTrainingDto>> getTrainerTraining(@PathVariable("username") String username,
-                                                                       @RequestHeader("X-Username") String authUsername,
-                                                                       @RequestHeader("X-Password") String authPassword,
                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodFrom,
                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodTo,
                                                                        @RequestParam(required = false) String traineeName)
     {
-        AuthenticationRequest credentials = new AuthenticationRequest(authUsername, authPassword);
-        List<Training> result = gymFacade.getTrainerTrainings(credentials, username, periodFrom, periodTo, traineeName);
-
+        List<Training> result = gymFacade.getTrainerTrainings(username, periodFrom, periodTo, traineeName);
         return ResponseEntity.ok(TrainingMapper.mapToTrainerTrainingResponse(result));
     }
 

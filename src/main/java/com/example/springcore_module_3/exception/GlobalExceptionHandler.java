@@ -55,6 +55,12 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", request);
     }
 
+    @ExceptionHandler(UserAccountLockedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountLocked(Exception ex, HttpServletRequest request) {
+        log.warn("Account locked for user: {}", ex.getMessage());
+        return buildResponse(HttpStatus.LOCKED, ex.getMessage(), request);
+    }
+
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message, HttpServletRequest request) {
         ErrorResponse body = new ErrorResponse(Instant.now(), status.value(), status.getReasonPhrase(), message, request.getRequestURI());
         return ResponseEntity.status(status).body(body);

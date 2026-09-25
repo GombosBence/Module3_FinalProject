@@ -1,5 +1,7 @@
 package com.example.springcore_module_3.metrics;
 
+import com.example.springcore_module_3.util.LoginAttemptTracker;
+import com.example.springcore_module_3.util.TokenBlockList;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +13,13 @@ class GymMetricsTest {
 
     private MeterRegistry registry;
     private GymMetrics gymMetrics;
+    private TokenBlockList tokenBlockList;
+    private LoginAttemptTracker loginAttemptTracker;
 
     @BeforeEach
     void setUp() {
         registry = new SimpleMeterRegistry();
-        gymMetrics = new GymMetrics(registry);
+        gymMetrics = new GymMetrics(registry, tokenBlockList, loginAttemptTracker);
     }
 
     @Test

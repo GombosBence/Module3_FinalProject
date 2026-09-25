@@ -5,6 +5,7 @@ import com.example.springcore_module_3.exception.UnAuthorizedAccessException;
 import com.example.springcore_module_3.metrics.GymMetrics;
 import com.example.springcore_module_3.model.User;
 import com.example.springcore_module_3.repository.UserRepository;
+import com.example.springcore_module_3.util.LoginAttemptTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,12 +28,14 @@ public class AuthenticationServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private GymMetrics gymMetrics;
+    @Mock
+    private LoginAttemptTracker loginAttemptTracker;
 
     private AuthenticationService authenticationService;
 
     @BeforeEach
     void setUp() {
-        authenticationService = new AuthenticationServiceImpl(userRepository, passwordEncoder,  gymMetrics);
+        authenticationService = new AuthenticationServiceImpl(userRepository, passwordEncoder,  gymMetrics, loginAttemptTracker);
     }
 
     private User generateUser() {
@@ -83,34 +86,6 @@ public class AuthenticationServiceTest {
                 () -> authenticationService.authenticate(user.getUsername(), "wrongPassword"));
 
         assertEquals(unknownUserException.getMessage(), wrongPasswordException.getMessage());
-    }
-
-    @Test
-    void authenticateAndAuthorize_succeeds_whenActingOnOwnProfile() {
-        User user = new User("John", "Doe", "John.Doe", "hashedPassword");
-        when(userRepository.findByUsername("John.Doe")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
-
-        assertDoesNotThrow(() ->
-                authenticationService.authenticateAndAuthorize("John.Doe", "password", "John.Doe"));
-    }
-
-    @Test
-    void authenticateAndAuthorize_throwsUnauthorized_whenTargetUsernameDiffers() {
-        User user = new User("John", "Doe", "John.Doe", "hashedPassword");
-        when(userRepository.findByUsername("John.Doe")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
-
-        assertThrows(UnAuthorizedAccessException.class, () ->
-                authenticationService.authenticateAndAuthorize("John.Doe", "password", "Someone.Else"));
-    }
-
-    @Test
-    void authenticateAndAuthorize_throwsAuthenticationFailed_whenCredentialsInvalid_beforeCheckingOwnership() {
-        when(userRepository.findByUsername("John.Doe")).thenReturn(Optional.empty());
-
-        assertThrows(AuthenticationFailedException.class, () ->
-                authenticationService.authenticateAndAuthorize("John.Doe", "wrongPassword", "SomeoneElse.Entirely"));
     }
 
     @Test

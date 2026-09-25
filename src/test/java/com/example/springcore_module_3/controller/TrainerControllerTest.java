@@ -1,17 +1,17 @@
 package com.example.springcore_module_3.controller;
-import com.example.springcore_module_3.dto.TraineeProfileDto;
 import com.example.springcore_module_3.dto.TrainerCreationResult;
 import com.example.springcore_module_3.dto.TrainingTypeDto;
 import com.example.springcore_module_3.dto.request.TrainerRegistrationRequest;
 import com.example.springcore_module_3.dto.request.TrainerSetActivateRequest;
 import com.example.springcore_module_3.dto.request.TrainerUpdateProfileRequest;
-import com.example.springcore_module_3.dto.response.TrainerUpdateResponse;
 import com.example.springcore_module_3.exception.AuthenticationFailedException;
 import com.example.springcore_module_3.exception.InvalidStateTransitionException;
 import com.example.springcore_module_3.facade.GymFacade;
 import com.example.springcore_module_3.model.Trainer;
 import com.example.springcore_module_3.model.TrainingType;
 import com.example.springcore_module_3.model.User;
+import com.example.springcore_module_3.util.JwtGenerator;
+import com.example.springcore_module_3.util.TokenBlockList;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -23,6 +23,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.NoSuchElementException;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,6 +39,12 @@ public class TrainerControllerTest {
 
     @MockitoBean
     private GymFacade gymFacade;
+
+    @MockitoBean
+    private JwtGenerator jwtGenerator;
+
+    @MockitoBean
+    private TokenBlockList tokenBlockList;
 
     private User sampleUser(String username) {
         return new User("John", "Doe", username, "hashedPw");
@@ -87,36 +94,33 @@ public class TrainerControllerTest {
 
         Trainer trainer = new Trainer(sampleUser("John.Doe"), sampleTrainingType("Fitness"));
 
-        when(gymFacade.getTrainerByUsername(any(), eq("John.Doe"))).thenReturn(trainer);
+        when(gymFacade.getTrainerByUsername(eq("John.Doe"))).thenReturn(trainer);
 
         mockMvc.perform(get("/api/trainer/John.Doe")
-                .header("X-Username", "John.Doe")
-                .header("X-Password", "Password123"))
+                        .with(user("John.Doe")))
                 .andExpect(status().isOk());
 
-        verify(gymFacade).getTrainerByUsername(any(), eq("John.Doe"));
+        verify(gymFacade).getTrainerByUsername(eq("John.Doe"));
     }
 
     @Test
     void getTrainerProfile_returns401_authentication_fails() throws Exception {
 
         doThrow(new AuthenticationFailedException("Invalid username or password"))
-                .when(gymFacade).getTrainerByUsername(any(), any());
+                .when(gymFacade).getTrainerByUsername(any());
 
         mockMvc.perform(get("/api/trainer/wrong.Doe")
-                .header("X-Username", "wrong.Doe")
-                .header("X-Password", "Password123"))
+                        .with(user("John.Doe")))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getTrainerProfile_returns404_whenNotFound() throws Exception {
 
-        when(gymFacade.getTrainerByUsername(any(), eq("Wrong.User"))).thenThrow(new NoSuchElementException("User not found"));
+        when(gymFacade.getTrainerByUsername(eq("Wrong.User"))).thenThrow(new NoSuchElementException("User not found"));
 
         mockMvc.perform(get("/api/trainer/Wrong.User")
-                .header("X-Username", "Wrong.User")
-                .header("X-Password", "Password123"))
+                        .with(user("John.Doe")))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.message").value("User not found"));
@@ -130,16 +134,15 @@ public class TrainerControllerTest {
 
         Trainer trainer =  new Trainer(sampleUser("John.Doe"), sampleTrainingType("Fitness"));
 
-        when(gymFacade.updateTrainer(any(), any())).thenReturn(trainer);
+        when(gymFacade.updateTrainer(any())).thenReturn(trainer);
 
         mockMvc.perform(put("/api/trainer/John.Doe")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        verify(gymFacade).updateTrainer(any(), any());
+        verify(gymFacade).updateTrainer(any());
     }
 
     @Test
@@ -148,11 +151,10 @@ public class TrainerControllerTest {
         TrainerUpdateProfileRequest request = new TrainerUpdateProfileRequest("John", "Doe",
                 new TrainingTypeDto(1L, "Fitness"), true);
 
-        when(gymFacade.updateTrainer(any(), any())).thenThrow(new AuthenticationFailedException("Invalid username or password"));
+        when(gymFacade.updateTrainer(any())).thenThrow(new AuthenticationFailedException("Invalid username or password"));
 
         mockMvc.perform(put("/api/trainer/Wrong.User")
-                        .header("X-Username", "Wrong.User")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
@@ -165,11 +167,10 @@ public class TrainerControllerTest {
         TrainerUpdateProfileRequest request = new TrainerUpdateProfileRequest("John", "Doe",
                 new TrainingTypeDto(1L, "Fitness"), true);
 
-        when(gymFacade.updateTrainer(any(), any())).thenThrow(new NoSuchElementException("User not found"));
+        when(gymFacade.updateTrainer(any())).thenThrow(new NoSuchElementException("User not found"));
 
         mockMvc.perform(put("/api/trainer/Wrong.User")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -184,13 +185,12 @@ public class TrainerControllerTest {
         TrainerSetActivateRequest request = new TrainerSetActivateRequest("John.Doe", true);
 
         mockMvc.perform(patch("/api/trainer/status")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        verify(gymFacade).activateTrainer(any(), any());
+        verify(gymFacade).activateTrainer(any());
     }
 
     @Test
@@ -198,11 +198,10 @@ public class TrainerControllerTest {
 
         TrainerSetActivateRequest request = new TrainerSetActivateRequest("John.Doe", true);
 
-        doThrow(new AuthenticationFailedException("Invalid username or password")).when(gymFacade).activateTrainer(any(), any());
+        doThrow(new AuthenticationFailedException("Invalid username or password")).when(gymFacade).activateTrainer(any());
 
         mockMvc.perform(patch("/api/trainer/status")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
@@ -213,11 +212,10 @@ public class TrainerControllerTest {
 
         TrainerSetActivateRequest request = new TrainerSetActivateRequest("John.Doe", false);
 
-        doThrow(new NoSuchElementException("User not found")).when(gymFacade).deactivateTrainer(any(), any());
+        doThrow(new NoSuchElementException("User not found")).when(gymFacade).deactivateTrainer(any());
 
         mockMvc.perform(patch("/api/trainer/status")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -228,11 +226,10 @@ public class TrainerControllerTest {
 
         TrainerSetActivateRequest request = new TrainerSetActivateRequest("John", false);
 
-        doThrow(new InvalidStateTransitionException("Trainer already inactive")).when(gymFacade).deactivateTrainer(any(), any());
+        doThrow(new InvalidStateTransitionException("Trainer already inactive")).when(gymFacade).deactivateTrainer(any());
 
         mockMvc.perform(patch("/api/trainer/status")
-                        .header("X-Username", "John.Doe")
-                        .header("X-Password", "rawPassword")
+                        .with(user("John.Doe"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())

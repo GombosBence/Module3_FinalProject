@@ -38,36 +38,36 @@ public class GymFacade {
         return traineeService.createTraineeProfile(user, address, dateOfBirth);
     }
 
-    public Trainee updateTrainee(AuthenticationRequest credentials, Trainee trainee) {
-        return traineeService.updateTraineeProfile(credentials, trainee);
+    public Trainee updateTrainee(Trainee trainee) {
+        return traineeService.updateTraineeProfile(trainee);
     }
 
-    public void activateTrainee(AuthenticationRequest credentials, String username) {
-        traineeService.activateTraineeProfile(credentials, username);
+    public void activateTrainee(String username) {
+        traineeService.activateTraineeProfile(username);
     }
 
-    public void deactivateTrainee(AuthenticationRequest credentials, String username) {
-        traineeService.deactivateTraineeProfile(credentials, username);
+    public void deactivateTrainee(String username) {
+        traineeService.deactivateTraineeProfile(username);
     }
 
-    public void deleteTrainee(AuthenticationRequest credentials, String username) {
-        traineeService.deleteTraineeProfile(credentials, username);
+    public void deleteTrainee(String username) {
+        traineeService.deleteTraineeProfile(username);
     }
 
-    public Trainee getTrainee(AuthenticationRequest credentials, Long id) {
-        return traineeService.selectTraineeProfile(credentials, id);
+    public Trainee getTrainee(Long id) {
+        return traineeService.selectTraineeProfile(id);
     }
 
-    public Trainee getTraineeByUsername(AuthenticationRequest credentials, String username) {
-        return traineeService.selectTraineeProfileByUsername(credentials, username);
+    public Trainee getTraineeByUsername(String username) {
+        return traineeService.selectTraineeProfileByUsername(username);
     }
 
-    public List<Trainer> getUnassignedTrainers(AuthenticationRequest credentials, String traineeUsername) {
-        return traineeService.selectUnassignedTrainers(credentials, traineeUsername);
+    public List<Trainer> getUnassignedTrainers(String traineeUsername) {
+        return traineeService.selectUnassignedTrainers(traineeUsername);
     }
 
-    public List<Trainer> updateTraineeTrainers(AuthenticationRequest credentials, String traineeUsername, List<String> usernames) {
-        return traineeService.updateTraineeTrainers(credentials, traineeUsername, usernames);
+    public List<Trainer> updateTraineeTrainers(String traineeUsername, List<String> usernames) {
+        return traineeService.updateTraineeTrainers(traineeUsername, usernames);
     }
 
     // --- Trainer ---
@@ -78,44 +78,41 @@ public class GymFacade {
         return trainerService.createTrainerProfile(user, specialization);
     }
 
-    public Trainer updateTrainer(AuthenticationRequest credentials, Trainer trainer) {
-        return trainerService.updateTrainerProfile(credentials, trainer);
+    public Trainer updateTrainer(Trainer trainer) {
+        return trainerService.updateTrainerProfile(trainer);
     }
 
-    public void activateTrainer(AuthenticationRequest credentials, String username) {
-        trainerService.activateTrainerProfile(credentials, username);
+    public void activateTrainer(String username) {
+        trainerService.activateTrainerProfile(username);
     }
 
-    public void deactivateTrainer(AuthenticationRequest credentials, String username) {
-        trainerService.deactivateTrainerProfile(credentials, username);
+    public void deactivateTrainer(String username) {
+        trainerService.deactivateTrainerProfile(username);
     }
 
-    public Trainer getTrainer(AuthenticationRequest credentials, Long id) {
-        return trainerService.selectTrainerProfile(credentials, id);
+    public Trainer getTrainer(Long id) {
+        return trainerService.selectTrainerProfile(id);
     }
 
-    public Trainer getTrainerByUsername(AuthenticationRequest credentials, String username) {
-        return trainerService.selectTrainerProfileByUsername(credentials, username);
+    public Trainer getTrainerByUsername(String username) {
+        return trainerService.selectTrainerProfileByUsername(username);
     }
 
     // --- Training ---
 
-    public void createTraining(AuthenticationRequest credentials, String traineeUsername, String trainerUsername,
+    public void createTraining(String traineeUsername, String trainerUsername,
                                    String trainingName, LocalDate trainingDate,
                                    Duration trainingDuration) {
-        trainingService.createTraining(credentials, traineeUsername, trainerUsername, trainingName,
+        trainingService.createTraining(traineeUsername, trainerUsername, trainingName,
                  trainingDate, trainingDuration);
     }
 
-    public List<Training> getTraineeTrainings(AuthenticationRequest credentials, String username,
-                                              LocalDate fromDate, LocalDate toDate, String trainerName,
-                                              String trainingType) {
-        return trainingService.selectTraineeTrainings(credentials, username, fromDate, toDate, trainerName, trainingType);
+    public List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingType) {
+        return trainingService.selectTraineeTrainings( username, fromDate, toDate, trainerName, trainingType);
     }
 
-    public List<Training> getTrainerTrainings(AuthenticationRequest credentials, String username,
-                                              LocalDate fromDate, LocalDate toDate, String traineeName) {
-        return trainingService.selectTrainerTrainings(credentials, username, fromDate, toDate, traineeName);
+    public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
+        return trainingService.selectTrainerTrainings(username, fromDate, toDate, traineeName);
     }
 
     // --- Auth ---
@@ -130,7 +127,7 @@ public class GymFacade {
 
     // --- TrainingType ---
 
-    public List<TrainingType> getTrainingTypes(AuthenticationRequest credentials) {
-        return trainingTypeService.findAll(credentials);
+    public List<TrainingType> getTrainingTypes() {
+        return trainingTypeService.findAll();
     }
 }
